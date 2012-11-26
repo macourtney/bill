@@ -1,4 +1,6 @@
-(ns bill.main)
+(ns bill.main
+  (:require [classlojure.core :as classlojure]
+            [clojure.java.io :as java-io]))
 
 (defn -main [& args]
-  (println "Hello World!"))
+  (load-file "build.clj"))
