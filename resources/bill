@@ -4,7 +4,7 @@
 # somewhere on your $PATH, like ~/bin. The rest of Bill the Builder will be
 # installed upon first run into the ~/.bill/self-installs directory.
 
-export BILL_VERSION="0.0.1"
+export BILL_VERSION="0.0.1-SNAPSHOT"
 
 case $BILL_VERSION in
     *SNAPSHOT) SNAPSHOT="YES" ;;
@@ -29,7 +29,7 @@ do
     fi
 done
 
-export BILL_HOME=${BILL_HOME:-"$HOME/.lein"}
+export BILL_HOME=${BILL_HOME:-"$HOME/.bill"}
 
 for f in "$BILL_HOME/billrc" ".billrc"; do
   if [ -e $f ]; then
@@ -213,7 +213,7 @@ else
             -Dbill.original.pwd="$ORIGINAL_PWD" \
             -Dbill.trampoline-file="$TRAMPOLINE_FILE" \
             -cp "$CLASSPATH" \
-            clojure.main -m bill.core.main "$@"
+            clojure.main -m bill.main "$@"
 
         EXIT_CODE=$?
 
