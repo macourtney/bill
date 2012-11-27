@@ -1,16 +1,14 @@
-(ns bill.core)
+(ns bill.core
+  (:require [bill.build :as build]
+            [bill.classpath :as classpath]
+            [classlojure.core :as classlojure]))
 
-(def build-atom (atom
-                  { :project-version "1.0.0-SNAPSHOT" }))
-                  
-(defn build []
-  @build-atom)
-  
-(defn build! [build-map]
-  (reset! build-atom build-map))
-
-(defn update-build [build-map args]
-  (build! build-map))
+(defn execute-build [build-map args]
+  (build/build! build-map)
+  (let [classloader (classpath/classloader)]
+    (classlojure/eval-in classloader '(def build ~(build/build)))
+    (doseq [form args]
+      (classlojure/eval-in classloader form))))
 
 (defmacro defbuild [build-map & args]
-  `(update-build '~build-map ~args))
+  `(execute-build '~build-map '~args))
