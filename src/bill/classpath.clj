@@ -41,6 +41,20 @@
   (when (and artifact version)
     (when-let [version-directory (maven-version-directory dependency-map)]
       (java-io/file version-directory (str (maven-file-name dependency-map) ".pom")))))
+      
+(defn bill-algorithm-directory [{ :keys [algorithm] :as dependency-map }]
+  (when algorithm
+    (java-io/file bill-repository-directory (name algorithm))))
+
+(defn bill-hash-directory [{ :keys [hash] :as dependency-map }]
+  (when hash
+    (when-let [algorithm-directory (bill-algorithm-directory dependency-map)]
+      (java-io/file algorithm-directory (name hash)))))
+
+(defn bill-jar [{ :keys [artifact version] :as dependency-map }]
+  (when (and artifact version)
+    (when-let [hash-directory (bill-hash-directory dependency-map)]
+      (java-io/file hash-directory (str (maven-file-name dependency-map) ".jar")))))
             
 (defn classpath []
   [])

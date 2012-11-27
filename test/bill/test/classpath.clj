@@ -89,7 +89,37 @@
   (assert-maven-pom { :group "org.clojure" :artifact "clojure" :version "1.4.0" })
   (assert-maven-pom { :group :org.clojure :artifact :clojure :version :1.4.0 })
   (is (nil? (maven-pom nil))))
+
+(defn assert-bill-algorithm-directory [clojure-dependency-map]
+  (let [clojure-algorithm-directory (bill-algorithm-directory clojure-dependency-map)]
+    (is (= (name (:algorithm clojure-dependency-map)) (.getName clojure-algorithm-directory)))
+    (is (= bill-repository-directory (.getParentFile clojure-algorithm-directory)))))
+
+(deftest test-bill-algorithm-directory
+  (assert-bill-algorithm-directory { :algorithm "sha1" })
+  (assert-bill-algorithm-directory { :algorithm :sha1 })
+  (is (nil? (bill-algorithm-directory nil))))
   
+(defn assert-bill-hash-directory [clojure-dependency-map]
+  (let [clojure-hash-directory (bill-hash-directory clojure-dependency-map)]
+    (is (= (name (:hash clojure-dependency-map)) (.getName clojure-hash-directory)))
+    (is (= (bill-algorithm-directory clojure-dependency-map) (.getParentFile clojure-hash-directory)))))
+
+(deftest test-bill-hash-directory
+  (assert-bill-hash-directory { :algorithm "sha1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
+  (assert-bill-hash-directory { :algorithm :sha1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
+  (is (nil? (bill-hash-directory nil))))
+  
+(defn assert-bill-jar [clojure-dependency-map]
+  (let [clojure-jar (bill-jar clojure-dependency-map)]
+    (is (= (str (maven-file-name clojure-dependency-map) ".jar") (.getName clojure-jar)))
+    (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-jar)))))
+
+(deftest test-bill-jar
+  (assert-bill-jar { :artifact "clojure" :version "1.4.0" :algorithm "sha1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
+  (assert-bill-jar { :artifact :clojure :version :1.4.0 :algorithm :sha1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
+  (is (nil? (bill-jar nil))))
+
 (deftest test-classpath
   (let [old-build (build/build)]
     (build/build!
