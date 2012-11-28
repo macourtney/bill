@@ -135,6 +135,21 @@
   (is (bill-jar? { :artifact :clojure :version :1.4.0 :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 }))
   (is (not (bill-jar? { :artifact :fail :version :1.0.0 :algorithm :SHA-1 :hash :fail }))))
 
+(defn assert-bill-clj [clojure-dependency-map]
+  (let [clojure-clj (bill-clj clojure-dependency-map)]
+    (is (= (str (maven-file-name clojure-dependency-map) ".clj") (.getName clojure-clj)))
+    (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-clj)))))
+  
+(deftest test-bill-clj
+  (assert-bill-clj { :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
+  (assert-bill-clj { :artifact :clojure :version :1.4.0 :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
+  (is (nil? (bill-clj nil))))
+  
+(deftest test-bill-clj?
+  (is (bill-clj? { :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }))
+  (is (bill-clj? { :artifact :clojure :version :1.4.0 :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 }))
+  (is (not (bill-clj? { :artifact :fail :version :1.0.0 :algorithm :SHA-1 :hash :fail }))))
+
 (deftest test-parse-hash-vector
   (is (= { :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
          (parse-hash-vector ["SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])))

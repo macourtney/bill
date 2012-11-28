@@ -68,6 +68,15 @@
   (when-let [bill-jar-file (bill-jar dependency-map)]
     (.exists bill-jar-file)))
 
+(defn bill-clj [{ :keys [artifact version] :as dependency-map }]
+  (when (and artifact version)
+    (when-let [hash-directory (bill-hash-directory dependency-map)]
+      (java-io/file hash-directory (str (maven-file-name dependency-map) ".clj")))))
+      
+(defn bill-clj? [dependency-map]
+  (when-let [bill-clj-file (bill-clj dependency-map)]
+    (.exists bill-clj-file)))
+
 (defn parse-hash-vector [hash-vector]
   (cond
     (second hash-vector) { :algorithm (first hash-vector) :hash (second hash-vector) }
