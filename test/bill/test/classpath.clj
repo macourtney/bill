@@ -80,6 +80,11 @@
   (assert-maven-jar { :group :org.clojure :artifact :clojure :version :1.4.0 })
   (is (nil? (maven-jar nil))))
   
+(deftest test-maven-jar?
+  (is (maven-jar? { :group "org.clojure" :artifact "clojure" :version "1.4.0" }))
+  (is (maven-jar? { :group :org.clojure :artifact :clojure :version :1.4.0 }))
+  (is (not (maven-jar? { :group :fail :artifact :fail :version :1.0.0 }))))
+  
 (defn assert-maven-pom [clojure-dependency-map]
   (let [clojure-pom (maven-pom clojure-dependency-map)]
     (is (= (str (maven-file-name clojure-dependency-map) ".pom") (.getName clojure-pom)))
@@ -90,14 +95,19 @@
   (assert-maven-pom { :group :org.clojure :artifact :clojure :version :1.4.0 })
   (is (nil? (maven-pom nil))))
 
+(deftest test-maven-pom?
+  (is (maven-pom? { :group "org.clojure" :artifact "clojure" :version "1.4.0" }))
+  (is (maven-pom? { :group :org.clojure :artifact :clojure :version :1.4.0 }))
+  (is (not (maven-pom? { :group :fail :artifact :fail :version :1.0.0 }))))
+  
 (defn assert-bill-algorithm-directory [clojure-dependency-map]
   (let [clojure-algorithm-directory (bill-algorithm-directory clojure-dependency-map)]
     (is (= (name (:algorithm clojure-dependency-map)) (.getName clojure-algorithm-directory)))
     (is (= bill-repository-directory (.getParentFile clojure-algorithm-directory)))))
 
 (deftest test-bill-algorithm-directory
-  (assert-bill-algorithm-directory { :algorithm "sha1" })
-  (assert-bill-algorithm-directory { :algorithm :sha1 })
+  (assert-bill-algorithm-directory { :algorithm "SHA-1" })
+  (assert-bill-algorithm-directory { :algorithm :SHA-1 })
   (is (nil? (bill-algorithm-directory nil))))
   
 (defn assert-bill-hash-directory [clojure-dependency-map]
@@ -106,8 +116,8 @@
     (is (= (bill-algorithm-directory clojure-dependency-map) (.getParentFile clojure-hash-directory)))))
 
 (deftest test-bill-hash-directory
-  (assert-bill-hash-directory { :algorithm "sha1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
-  (assert-bill-hash-directory { :algorithm :sha1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
+  (assert-bill-hash-directory { :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
+  (assert-bill-hash-directory { :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
   (is (nil? (bill-hash-directory nil))))
   
 (defn assert-bill-jar [clojure-dependency-map]
@@ -116,10 +126,39 @@
     (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-jar)))))
 
 (deftest test-bill-jar
-  (assert-bill-jar { :artifact "clojure" :version "1.4.0" :algorithm "sha1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
-  (assert-bill-jar { :artifact :clojure :version :1.4.0 :algorithm :sha1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
+  (assert-bill-jar { :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" })
+  (assert-bill-jar { :artifact :clojure :version :1.4.0 :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 })
   (is (nil? (bill-jar nil))))
+  
+(deftest test-bill-jar?
+  (is (bill-jar? { :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }))
+  (is (bill-jar? { :artifact :clojure :version :1.4.0 :algorithm :SHA-1 :hash :867288bc07a6514e2e0b471c5be0bccd6c3a51f9 }))
+  (is (not (bill-jar? { :artifact :fail :version :1.0.0 :algorithm :SHA-1 :hash :fail }))))
 
+(deftest test-parse-hash-vector
+  (is (= { :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+         (parse-hash-vector ["SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])))
+  (is (= { :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+         (parse-hash-vector ["867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])))
+  (is (nil? (parse-hash-vector [])))
+  (is (nil? (parse-hash-vector nil))))
+
+(deftest test-parse-dependency-symbol
+  (is (= { :group "org.clojure" :artifact "clojure" }
+         (parse-dependency-symbol 'org.clojure/clojure)))
+  (is (= { :group "clojure" :artifact "clojure" }
+         (parse-dependency-symbol 'clojure)))
+  (is (nil? (parse-dependency-symbol nil))))
+  
+(deftest test-dependency-map
+  (is (= { :group "org.clojure" :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+         (dependency-map ['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])))
+  (is (= { :group "clojure" :artifact "clojure" :version "1.4.0" :algorithm "SHA-1" :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+         (dependency-map ['clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])))
+  (is (= { :group "clojure" :artifact "clojure" :version "1.4.0" }
+         (dependency-map ['clojure "1.4.0"])))
+  (is (nil? (dependency-map nil))))
+  
 (deftest test-classpath
   (let [old-build (build/build)]
     (build/build!
