@@ -4,8 +4,7 @@
             [clojure.java.io :as java-io]
             [clojure.string :as string])
   (:import [java.io PushbackReader]
-           [java.security MessageDigest]
-           [org.apache.commons.codec.binary Hex]))
+           [java.security MessageDigest]))
 
 (def user-directory (java-io/file (System/getProperty "user.home")))
 
@@ -19,8 +18,8 @@
 
 (def default-algorithm "SHA-1")
 (def default-chunk-size 1024)
+(def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 
-;(def clojure-dependency ['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])
 (def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "ed68cee5f10e9d1ec69e1df80d26c001327a9435"])
 
 
@@ -129,7 +128,15 @@
   ([input-stream] (read-bytes input-stream default-chunk-size))
   ([input-stream buffer-size]
     (take-while identity (repeatedly #(read-byte-chunk input-stream buffer-size)))))
-        
+
+(defn encode-hex-byte [byte]
+  [(nth hex-digits (bit-and 15 (bit-shift-right byte 4)))
+   (nth hex-digits (bit-and 15 byte))])
+    
+(defn encode-hex [bytes]
+  (when bytes
+    (string/join "" (mapcat encode-hex-byte bytes))))
+
 (defn hash-code [file algorithm]
   (when (and file algorithm (.exists file))
     (let [message-digest (MessageDigest/getInstance algorithm)]
@@ -137,7 +144,7 @@
       (with-open [file-stream (java-io/input-stream file)]
         (doseq [file-bytes (read-bytes file-stream)]
           (.update message-digest file-bytes)))
-      (String. (Hex/encodeHex (.digest message-digest))))))
+      (encode-hex (.digest message-digest)))))
       
 (defn validate-hash [file algorithm file-hash]
   (= file-hash (hash-code file algorithm)))
