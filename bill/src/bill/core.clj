@@ -11,9 +11,12 @@
 (defn classloader! [classloader]
   (reset! classloader-atom classloader))
 
+(defn classloader []
+  (apply classlojure/classlojure (classpath/classpath)))
+  
 (defn execute-build [build-map args]
   (build/build! build-map)
-  (let [classloader (classpath/classloader)]
+  (let [classloader (classloader)]
     (classlojure/eval-in classloader `(do
                                         (require 'bill.build)
                                         (bill.build/build! '~build-map)))

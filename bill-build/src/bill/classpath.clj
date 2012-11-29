@@ -1,6 +1,5 @@
 (ns bill.classpath
   (:require [bill.build :as build]
-            [classlojure.core :as classlojure]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
   (:import [java.io PushbackReader]
@@ -203,6 +202,3 @@
       
 (defn classpath []
   (resolve-dependencies (concat (build/dependencies) [bill-dependency])))
-
-(defn classloader []
-  (apply classlojure/classlojure (classpath)))
