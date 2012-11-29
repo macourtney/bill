@@ -1,7 +1,6 @@
 (ns bill.build)
 
-(def build-atom (atom
-                  {}))
+(def build-atom (atom {}))
                   
 (defn build []
   @build-atom)
