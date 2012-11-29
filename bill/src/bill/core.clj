@@ -3,6 +3,14 @@
             [bill.classpath :as classpath]
             [classlojure.core :as classlojure]))
 
+(def classloader-atom (atom nil))
+
+(defn classloader []
+  @classloader-atom)
+  
+(defn classloader! [classloader]
+  (reset! classloader-atom classloader))
+
 (defn execute-build [build-map args]
   (build/build! build-map)
   (let [classloader (classpath/classloader)]
@@ -10,7 +18,8 @@
                                         (require 'bill.build)
                                         (bill.build/build! '~build-map)))
     (doseq [form args]
-      (classlojure/eval-in classloader form))))
+      (classlojure/eval-in classloader form)
+    (classloader! classloader))))
 
 (defmacro defbuild [build-map & args]
   `(execute-build '~build-map '~args))

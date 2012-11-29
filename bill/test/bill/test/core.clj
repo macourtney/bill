@@ -19,4 +19,6 @@
       (is (build/build)))
     (is (= { :project ['org.bill/bill project-version] :description description }
            (build/build)))
+    (is (classloader))
+    (classloader! nil)
     (build/build! old-build)))
