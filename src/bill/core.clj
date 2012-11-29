@@ -5,8 +5,9 @@
 
 (defn execute-build [build-map args]
   (build/build! build-map)
-  (let [classloader (classpath/classloader)]
-    (classlojure/eval-in classloader '(def build ~(build/build)))
+  (let [classloader (classpath/classloader)
+        build-def `(def ~'build '~build-map)]
+    (classlojure/eval-in classloader build-def)
     (doseq [form args]
       (classlojure/eval-in classloader form))))
 

@@ -13,7 +13,9 @@
       { :project [org.bill/bill "0.0.1-SNAPSHOT"]
         :description "A test build" }
       
-      (println "Hello World!"))
+      (use 'clojure.test)
+      
+      (is build))
     (is (= { :project ['org.bill/bill project-version] :description description }
            (build/build)))
     (build/build! old-build)))
