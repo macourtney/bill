@@ -14,8 +14,9 @@
         :description "A test build" }
       
       (use 'clojure.test)
+      (require ['bill.build :as 'build])
       
-      (is build))
+      (is (build/build)))
     (is (= { :project ['org.bill/bill project-version] :description description }
            (build/build)))
     (build/build! old-build)))

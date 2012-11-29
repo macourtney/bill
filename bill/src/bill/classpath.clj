@@ -20,7 +20,8 @@
 (def default-algorithm "SHA-1")
 (def default-chunk-size 1024)
 
-(def clojure-dependency ['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])
+;(def clojure-dependency ['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "ed68cee5f10e9d1ec69e1df80d26c001327a9435"])
 
 
 (defn maven-group-directory [{ :keys [group] }]
@@ -157,6 +158,9 @@
 (defn dependencies [dependency-map]
   (when-let [bill-clj-map (read-bill-clj dependency-map)]
     (:dependencies bill-clj-map)))
+
+(defn child-dependency-maps [parent-dependency-map]
+  (filter identity (map dependency-map (dependencies parent-dependency-map))))
       
 (defn group-artifact-str [dependency-map]
   (when dependency-map
@@ -171,11 +175,16 @@
     (let [classpath-dependencies (:dependencies classpath-map)]
       (if-let [dependency-map (first classpath-dependencies)]
         (let [group-artifact (group-artifact-str dependency-map)
-              classpath (:classpath classpath-map)]
+              classpath (:classpath classpath-map)
+              next-dependencies (rest classpath-dependencies)]
           (if (contains? classpath group-artifact)
-            (recur (assoc classpath-map :dependencies (rest classpath-dependencies)))
+            (recur (assoc classpath-map :dependencies next-dependencies))
             (recur { :classpath (assoc classpath group-artifact dependency-map)
-                     :dependencies (concat (rest classpath-dependencies) (map dependency-map (dependencies dependency-map))) })))
+                     :dependencies (if-let [child-dependencies (seq (child-dependency-maps dependency-map))]
+                                     (if next-dependencies
+                                       (concat next-dependencies child-dependencies)
+                                       child-dependencies)
+                                     next-dependencies) })))
         (:classpath classpath-map)))))
       
 (defn resolve-dependencies
@@ -186,7 +195,7 @@
         :dependencies (map dependency-map dependencies) } )))))
       
 (defn classpath []
-  (resolve-dependencies (concat (build/dependencies) [clojure-dependency])))
+  (resolve-dependencies (concat (build/dependencies) [bill-dependency])))
 
 (defn classloader []
   (apply classlojure/classlojure (classpath)))
