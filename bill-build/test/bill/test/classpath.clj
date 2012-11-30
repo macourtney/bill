@@ -6,7 +6,7 @@
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
-(def bill-hash "11fcd23d96afa5af3186652838cb96ef9e6cfa06")
+(def bill-hash "79359f4b714b0eecb4ea2cc38a8b8b508bb81b91")
 (def bill-algorithm "SHA-1")
 (def bill-version "0.0.1-SNAPSHOT")
 (def bill-name 'org.bill/bill-build)

@@ -20,7 +20,7 @@
       (require ['bill.build :as 'build])
       
       (is (build/build))
-      
+
       (deftarget args-test
         "Tests the given arguments against [\"Args\" \"test.\"]."
         [& args]
