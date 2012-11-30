@@ -19,8 +19,6 @@
 (def default-chunk-size 1024)
 (def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "ed68cee5f10e9d1ec69e1df80d26c001327a9435"])
-
 
 (defn maven-group-directory [{ :keys [group] }]
   (when group
@@ -200,5 +198,5 @@
       { :classpath {} 
         :dependencies (map dependency-map dependencies) } )))))
       
-(defn classpath []
-  (resolve-dependencies (concat (build/dependencies) [bill-dependency])))
+(defn classpath [bill-dependencies]
+  (resolve-dependencies (concat (build/dependencies) bill-dependencies)))

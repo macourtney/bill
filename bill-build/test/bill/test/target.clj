@@ -28,7 +28,6 @@
     (is (nil? (find-target test-target-name)))
     (deftarget test-target [& args]
       (println "args:" args))
-    (println "(find-target test-target-name):" (find-target test-target-name))
     (is (find-target test-target-name))
     (is (= (:name (find-target test-target-name)) (name test-target-name)))
     (targets! {})

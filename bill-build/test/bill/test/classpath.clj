@@ -1,12 +1,12 @@
 (ns bill.test.classpath
   (:refer-clojure :exclude [clojure-version])
   (:use clojure.test
-        [bill.classpath :exclude [bill-dependency]])
+        bill.classpath)
   (:require [bill.build :as build]
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
-(def bill-hash "ed68cee5f10e9d1ec69e1df80d26c001327a9435")
+(def bill-hash "11fcd23d96afa5af3186652838cb96ef9e6cfa06")
 (def bill-algorithm "SHA-1")
 (def bill-version "0.0.1-SNAPSHOT")
 (def bill-name 'org.bill/bill-build)
@@ -258,7 +258,7 @@
     (is clojure-jar)
     (is (.exists clojure-jar))
     (is (= (hash-code clojure-jar clojure-algorithm) clojure-hash)))
-  (let [bill-jar (java-io/file (bill-jar bill-dependency-map))]
+  (let [bill-jar (java-io/file (maven-jar bill-dependency-map))] ;(bill-jar bill-dependency-map)
     (is bill-jar)
     (is (.exists bill-jar))
     (is (= (hash-code bill-jar bill-algorithm) bill-hash))))
@@ -293,8 +293,8 @@
   (let [old-build (build/build)]
     (build/build!
       { :dependencies [clojure-dependency] })
-    (is (= (classpath) [(bill-jar bill-dependency-map) (bill-jar clojure-dependency-map)]))
+    (is (= (classpath [bill-dependency]) [(bill-jar bill-dependency-map) (bill-jar clojure-dependency-map)]))
     (build/build!
       { :dependencies [bill-dependency] })
-    (is (= (classpath) [(bill-jar clojure-dependency-map) (bill-jar bill-dependency-map)]))
+    (is (= (classpath []) [(bill-jar clojure-dependency-map) (bill-jar bill-dependency-map)]))
     (build/build! old-build)))

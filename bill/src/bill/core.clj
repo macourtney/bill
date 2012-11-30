@@ -1,9 +1,12 @@
 (ns bill.core
   (:require [bill.build :as build]
+            [bill.build-environment :as build-environment]
             [bill.classpath :as classpath]
             [classlojure.core :as classlojure]))
 
 (def classloader-atom (atom nil))
+
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "11fcd23d96afa5af3186652838cb96ef9e6cfa06"])
 
 (defn classloader []
   @classloader-atom)
@@ -11,18 +14,31 @@
 (defn classloader! [classloader]
   (reset! classloader-atom classloader))
 
-(defn classloader []
-  (apply classlojure/classlojure (classpath/classpath)))
+(defn create-classloader []
+  (apply classlojure/classlojure (classpath/classpath [bill-dependency])))
   
-(defn execute-build [build-map args]
-  (build/build! build-map)
-  (let [classloader (classloader)]
-    (classlojure/eval-in classloader `(do
+(defn run-target-in-classloader [target args]
+  (classlojure/eval-in (classloader) `(~'run-target ~target ~args)))
+
+(defn initialize-environments [build-map]
+  (classlojure/eval-in (classloader) `(do
+                                        (use 'bill.target)
                                         (require 'bill.build)
                                         (bill.build/build! '~build-map)))
-    (doseq [form args]
-      (classlojure/eval-in classloader form)
-    (classloader! classloader))))
+  (build-environment/eval-in-build ['(use 'bill.target)]))
+
+(defn eval-forms [forms]
+  (doseq [form forms]
+    (if (= (first form) 'build-environment)
+      (build-environment/eval-in-build (rest form))
+      (classlojure/eval-in (classloader) form))))
+
+(defn execute-build [build-map forms]
+  (build/build! build-map)
+  (let [classloader (create-classloader)]
+    (classloader! classloader)
+    (initialize-environments build-map)
+    (eval-forms forms)))
 
 (defmacro defbuild [build-map & args]
   `(execute-build '~build-map '~args))
