@@ -1,91 +1,14 @@
 (ns bill.classpath
   (:require [bill.build :as build]
+            [bill.repository :as repository]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
-  (:import [java.io PushbackReader]
+  (:import [java.io PushbackReader StringWriter]
            [java.security MessageDigest]))
-
-(def user-directory (java-io/file (System/getProperty "user.home")))
-
-(def maven-directory (java-io/file user-directory ".m2"))
-
-(def maven-repository-directory (java-io/file maven-directory "repository"))
-
-(def bill-directory (java-io/file user-directory ".bill"))
-
-(def bill-repository-directory (java-io/file bill-directory "repository"))
 
 (def default-algorithm "SHA-1")
 (def default-chunk-size 1024)
 (def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
-
-
-(defn maven-group-directory [{ :keys [group] }]
-  (when group
-    (reduce java-io/file maven-repository-directory (string/split (name group) #"\."))))
-  
-(defn maven-artifact-directory [{ :keys [artifact] :as dependency-map }]
-  (when artifact
-    (when-let [group-directory (maven-group-directory dependency-map)]
-      (java-io/file group-directory (name artifact)))))
-  
-(defn maven-version-directory [{ :keys [version] :as dependency-map }]
-  (when version
-    (when-let [artifact-directory (maven-artifact-directory dependency-map)]
-      (java-io/file artifact-directory (name version)))))
-
-(defn maven-file-name [{ :keys [artifact version] :as dependency-map }]
-  (when (and artifact version)
-    (str (name artifact) "-" (name version))))
-      
-(defn maven-jar [{ :keys [artifact version] :as dependency-map }]
-  (when (and artifact version)
-    (when-let [version-directory (maven-version-directory dependency-map)]
-      (java-io/file version-directory (str (maven-file-name dependency-map) ".jar")))))
-      
-(defn maven-jar? [dependency-map]
-  (when-let [maven-jar-file (maven-jar dependency-map)]
-    (.exists maven-jar-file)))
-
-(defn maven-pom [{ :keys [artifact version] :as dependency-map }]
-  (when (and artifact version)
-    (when-let [version-directory (maven-version-directory dependency-map)]
-      (java-io/file version-directory (str (maven-file-name dependency-map) ".pom")))))
-      
-(defn maven-pom? [dependency-map]
-  (when-let [maven-pom-file (maven-pom dependency-map)]
-    (.exists maven-pom-file)))
-      
-(defn bill-algorithm-directory [{ :keys [algorithm] :as dependency-map }]
-  (when algorithm
-    (java-io/file bill-repository-directory (name algorithm))))
-
-(defn bill-hash-directory [{ :keys [hash] :as dependency-map }]
-  (when hash
-    (when-let [algorithm-directory (bill-algorithm-directory dependency-map)]
-      (java-io/file algorithm-directory (name hash)))))
-
-(defn bill-jar [{ :keys [artifact version] :as dependency-map }]
-  (when (and artifact version)
-    (when-let [hash-directory (bill-hash-directory dependency-map)]
-      (java-io/file hash-directory (str (maven-file-name dependency-map) ".jar")))))
-      
-(defn bill-jar? [dependency-map]
-  (when-let [bill-jar-file (bill-jar dependency-map)]
-    (.exists bill-jar-file)))
-
-(defn bill-clj [{ :keys [artifact version] :as dependency-map }]
-  (when (and artifact version)
-    (when-let [hash-directory (bill-hash-directory dependency-map)]
-      (java-io/file hash-directory (str (maven-file-name dependency-map) ".clj")))))
-      
-(defn bill-clj? [dependency-map]
-  (when-let [bill-clj-file (bill-clj dependency-map)]
-    (.exists bill-clj-file)))
-    
-(defn read-bill-clj [dependency-map]
-  (when (bill-clj? dependency-map)
-    (read (PushbackReader. (java-io/reader (bill-clj dependency-map))))))
 
 (defn parse-hash-vector [hash-vector]
   (cond
@@ -147,7 +70,7 @@
   (= file-hash (hash-code file algorithm)))
 
 (defn assure-hash-directory [algorithm hash]
-  (let [hash-directory (bill-hash-directory { :algorithm algorithm :hash hash })]
+  (let [hash-directory (repository/bill-hash-directory { :algorithm algorithm :hash hash })]
     (when (not (.exists hash-directory))
       (.mkdirs hash-directory))
     hash-directory))
@@ -160,8 +83,26 @@
       (java-io/copy jar-file (java-io/file hash-directory (.getName jar-file))))))
 
 (defn dependencies [dependency-map]
-  (when-let [bill-clj-map (read-bill-clj dependency-map)]
+  (when-let [bill-clj-map (repository/read-bill-clj dependency-map)]
     (:dependencies bill-clj-map)))
+
+(defn dependency-vector [dependency-map]
+  (let [group (:group dependency-map)
+        artifact (:artifact dependency-map)]
+    [(symbol (if (and group (not (= group artifact))) (str group "/" artifact) artifact))
+     (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
+
+(defn serialize-clj [form]
+  (when form
+    (let [string-writer (new StringWriter)]
+      (binding [*print-dup* true]
+        (binding [*out* string-writer]
+          (print form)))
+      (.close string-writer)
+      (.toString string-writer))))
+    
+(defn dependency-vector-str [dependency-map]
+  (serialize-clj (dependency-vector dependency-map)))
 
 (defn child-dependency-maps [parent-dependency-map]
   (filter identity (map dependency-map (dependencies parent-dependency-map))))
@@ -194,7 +135,7 @@
 (defn resolve-dependencies
   ([] (resolve-dependencies (build/dependencies)))
   ([dependencies]
-    (map bill-jar (vals (create-classpath
+    (map repository/bill-jar (vals (create-classpath
       { :classpath {} 
         :dependencies (map dependency-map dependencies) } )))))
       

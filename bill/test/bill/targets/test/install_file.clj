@@ -3,6 +3,7 @@
         bill.targets.install-file)
   (:require [bill.build :as build]
             [bill.classpath :as classpath]
+            [bill.repository :as repository]
             [bill.target :as target]))
 
 (def test-jar-path "resources/test-1.0.0.jar")
@@ -15,7 +16,7 @@
 (def hash-code "da1fbf7e57c838f2a9412778ee97b833c53d9137")
 (def md5-hash-code "975d8e1e430f07527155dd40e5c783d8")
 (def dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]])
-(def dependencies (serialize-clj dependencies-vector))
+(def dependencies (classpath/serialize-clj dependencies-vector))
             
 (deftest test-parse-args
   (is (= (parse-args ["-f" test-jar-path]) [{ :file test-jar-path :algorithm algorithm } [] usage]))
@@ -57,10 +58,7 @@
   (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
           { :group artifact :artifact artifact :version version :algorithm algorithm :hash hash-code })))
 
-(deftest test-serialize-clj
-  (is (= (serialize-clj 1) "1"))
-  (is (= (serialize-clj "blah") "\"blah\""))
-  (is (= (serialize-clj { :foo "bar" }) "#=(clojure.lang.PersistentArrayMap/create {:foo \"bar\"})")))
+
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])
@@ -72,9 +70,9 @@
   (let [options { :artifact artifact :version version :algorithm algorithm :dependencies dependencies }
         args [test-jar-path]
         dependency-map (create-dependency-map options args)
-        hash-directory (classpath/bill-hash-directory dependency-map)
-        bill-jar-file (classpath/bill-jar dependency-map)
-        bill-clj-file (classpath/bill-clj dependency-map)]
+        hash-directory (repository/bill-hash-directory dependency-map)
+        bill-jar-file (repository/bill-jar dependency-map)
+        bill-clj-file (repository/bill-clj dependency-map)]
     (try
       (is (not (.exists bill-clj-file)))
       (is (not (.exists bill-jar-file)))

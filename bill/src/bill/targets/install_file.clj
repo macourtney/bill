@@ -1,6 +1,7 @@
 (ns bill.targets.install-file
   (:use bill.target)
   (:require [bill.classpath :as classpath]
+            [bill.repository :as repository]
             [clojure.java.io :as java-io]
             [clojure.tools.cli :as cli :only [cli]])
   (:import [java.io StringWriter]))
@@ -66,15 +67,6 @@
     :version (find-version options)
     :algorithm (find-algorithm options)
     :hash (create-hash options args) })
-
-(defn serialize-clj [form]
-  (when form
-    (let [string-writer (new StringWriter)]
-      (binding [*print-dup* true]
-        (binding [*out* string-writer]
-          (print form)))
-      (.close string-writer)
-      (.toString string-writer))))
     
 (defn create-bill-clj-map [options args]
   { :group (find-group options)
@@ -86,22 +78,26 @@
 
 (defn write-bill-clj [options args]
   (let [dependency-map (create-dependency-map options args)
-        bill-clj (classpath/bill-clj dependency-map)]
+        bill-clj (repository/bill-clj dependency-map)]
     (.mkdirs (.getParentFile bill-clj))
     (with-open [bill-clj-writer (java-io/writer bill-clj)]
       (binding [*out* bill-clj-writer]
-        (println (serialize-clj (create-bill-clj-map options args)))))))
+        (println (classpath/serialize-clj (create-bill-clj-map options args)))))))
 
 (defn copy-bill-jar [options args]
   (let [file (create-file options args)
         dependency-map (create-dependency-map options args)
-        bill-jar (classpath/bill-jar dependency-map)]
+        bill-jar (repository/bill-jar dependency-map)]
     (.mkdirs (.getParentFile bill-jar))
     (java-io/copy file bill-jar)))
-  
+    
+(defn print-results [options args]
+  (println "Installed as:" (classpath/dependency-vector-str (create-dependency-map options args))))
+
 (defn update-repository [options args]
   (copy-bill-jar options args)
-  (write-bill-clj options args))
+  (write-bill-clj options args)
+  (print-results options args))
   
 (deftarget install-file [& args]
   (let [[options args banner] (parse-args args)]
