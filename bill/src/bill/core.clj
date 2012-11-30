@@ -2,6 +2,7 @@
   (:require [bill.build :as build]
             [bill.build-environment :as build-environment]
             [bill.classpath :as classpath]
+            [bill.init-targets :as init-targets] ; Loads default targets.
             [classlojure.core :as classlojure]))
 
 (def classloader-atom (atom nil))
