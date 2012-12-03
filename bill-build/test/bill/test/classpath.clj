@@ -8,7 +8,7 @@
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
-(def bill-hash "f462fa8d59517ff0b27deb5391d9c27e5c3eec16")
+(def bill-hash "0a2e91bd4e243f82cb4e03968f8eabb74368e662")
 (def bill-algorithm "SHA-1")
 (def bill-version "0.0.1-SNAPSHOT")
 (def bill-name 'org.bill/bill-build)
@@ -125,11 +125,6 @@
 (deftest test-dependencies
   (is (= (dependencies clojure-dependency-map) []))
   (is (nil? (dependencies fail-dependency-map))))
-
-(deftest test-serialize-clj
-  (is (= (serialize-clj 1) "1"))
-  (is (= (serialize-clj "blah") "\"blah\""))
-  (is (= (serialize-clj { :foo "bar" }) "#=(clojure.lang.PersistentArrayMap/create {:foo \"bar\"})")))
 
 (deftest test-group-artifact-str
   (is (= (group-artifact-str clojure-dependency-map) (str clojure-name)))

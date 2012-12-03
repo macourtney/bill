@@ -18,6 +18,15 @@
 (def clojure-dependency-map (classpath/dependency-map clojure-dependency))
 (def fail-dependency-map { :artifact :fail :version :1.0.0 :algorithm "SHA-1" :hash :fail })
 
+(def clojure-clj-map { :group "org.clojure"
+                       :artifact "clojure"
+                       :version "1.4.0"
+                       :algorithm "SHA-1"
+                       :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"
+ 
+                       :dependencies [] })
+(def test-clj (java-io/file "test/clojure-1.4.0.clj"))
+
 (deftest test-file-name
   (is (= (file-name { :artifact clojure-artifact :version clojure-version }) "clojure-1.4.0"))
   (is (= (file-name { :artifact (keyword clojure-artifact) :version (keyword clojure-version) }) "clojure-1.4.0"))
@@ -25,10 +34,6 @@
   (is (nil? (file-name { :version (keyword clojure-version) })))
   (is (nil? (file-name {})))
   (is (nil? (file-name nil))))
-
-(deftest test-user-directory
-  (is user-directory)
-  (is (.exists user-directory)))
 
 (deftest test-bill-directory
   (is bill-directory)
@@ -98,12 +103,18 @@
   (is (bill-clj? { :artifact (keyword clojure-artifact) :version (keyword clojure-version) :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) }))
   (is (not (bill-clj? fail-dependency-map))))
 
+(deftest test-read-bill-clj-file
+  (is (= (read-bill-clj-file (bill-clj clojure-dependency-map))
+          clojure-clj-map)))
+  
 (deftest test-read-bill-clj
   (is (= (read-bill-clj clojure-dependency-map)
-          { :group "org.clojure"
-            :artifact "clojure"
-            :version "1.4.0"
-            :algorithm "SHA-1"
-            :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"
- 
-            :dependencies [] })))
+          clojure-clj-map)))
+
+(deftest test-write-bill-clj
+  (try
+    (is (not (.exists test-clj)))
+    (write-bill-clj test-clj clojure-clj-map)
+    (is (.exists test-clj))
+    (finally
+      (.delete test-clj))))

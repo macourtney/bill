@@ -4,7 +4,7 @@
             [bill.repository :as repository]
             [clojure.java.io :as java-io]
             [clojure.tools.cli :as cli :only [cli]])
-  (:import [java.io StringWriter]))
+  (:import [java.io PushbackReader StringWriter]))
 
 (defn parse-args [args]
   (cli/cli args
@@ -13,7 +13,8 @@
      ["-a" "--artifact" "The artifact id."]
      ["-v" "--version" "The version."]
      ["-l" "--algorithm" "The hash algorithm to use." :default "SHA-1"]
-     ["-d" "--dependencies" "The dependency vector to use."]))
+     ["-d" "--dependencies" "The dependency vector to use."]
+     ["-c" "--clj" "The clj file to use."]))
 
 (defn find-file-path [options args]
   (or (:file options) (first args)))
@@ -33,6 +34,13 @@
 
 (defn find-algorithm [options]
   (:algorithm options))
+
+(defn find-clj [options]
+  (:clj options))
+
+(defn find-clj-file [options]
+  (when-let [clj-file-name (find-clj options)]
+    (java-io/file clj-file-name)))
 
 (defn find-dependencies [options]
   (:dependencies options))
@@ -54,35 +62,50 @@
   (when-let [version (find-version options)]
     (and version (not-empty version))))
 
-(defn validate-args [options args]
-  (and (validate-file options args) (validate-artifact options) (validate-version options)))
-
-(defn create-hash [options args]
-  (when-let [file (create-file options args)]
-    (classpath/hash-code file (find-algorithm options))))
-  
-(defn create-dependency-map [options args]
-  { :group (find-group options)
-    :artifact (find-artifact options)
-    :version (find-version options)
-    :algorithm (find-algorithm options)
-    :hash (create-hash options args) })
+(defn file-bill-clj-map [options]
+  (when-let [clj-file (find-clj-file options)]
+    (when (.exists clj-file)
+      (read (PushbackReader. (java-io/reader clj-file))))))
     
-(defn create-bill-clj-map [options args]
+(defn validate-clj [options]
+  (when-let [clj-file (find-clj options)]
+    (when (not-empty clj-file)
+      (when-let [clj-map (file-bill-clj-map options)]
+        (and (validate-artifact clj-map) (validate-version clj-map))))))
+
+(defn validate-args [options args]
+  (and (validate-file options args) (or (validate-clj options) (and (validate-artifact options) (validate-version options)))))
+
+(defn create-hash
+  ([options args] (create-hash options args (find-algorithm options)))
+  ([options args algorithm]
+    (when-let [file (create-file options args)]
+      (classpath/hash-code file algorithm))))
+
+(defn options-bill-clj-map [options args]
   { :group (find-group options)
     :artifact (find-artifact options)
     :version (find-version options)
-    :algorithm (find-algorithm options)
-    :hash (create-hash options args)
     :dependencies (find-dependencies-vector options) })
+
+(defn update-bill-clj-map-hash [options args bill-clj-map]
+  (let [algorithm (or (:algorithm bill-clj-map) (find-algorithm options))]
+    (merge bill-clj-map
+      { :algorithm algorithm
+        :hash (create-hash options args algorithm) })))
+
+(defn create-bill-clj-map [options args]
+  (update-bill-clj-map-hash options args
+    (merge (options-bill-clj-map options args) (file-bill-clj-map options))))
+
+(defn create-dependency-map [options args]
+  (create-bill-clj-map options args))
 
 (defn write-bill-clj [options args]
   (let [dependency-map (create-dependency-map options args)
         bill-clj (repository/bill-clj dependency-map)]
-    (.mkdirs (.getParentFile bill-clj))
-    (with-open [bill-clj-writer (java-io/writer bill-clj)]
-      (binding [*out* bill-clj-writer]
-        (println (classpath/serialize-clj (create-bill-clj-map options args)))))))
+    (repository/write-bill-clj bill-clj (create-bill-clj-map options args))
+    (.mkdirs (.getParentFile bill-clj))))
 
 (defn copy-bill-jar [options args]
   (let [file (create-file options args)

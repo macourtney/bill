@@ -1,12 +1,13 @@
 (ns bill.maven-repository
   (:require [bill.build :as build]
             [bill.repository :as repository]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
   (:import [java.io PushbackReader]
            [java.security MessageDigest]))
 
-(def maven-directory (java-io/file repository/user-directory ".m2"))
+(def maven-directory (java-io/file util/user-directory ".m2"))
 
 (def maven-repository-directory (java-io/file maven-directory "repository"))
 

@@ -1,13 +1,12 @@
 (ns bill.repository
   (:require [bill.build :as build]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
   (:import [java.io PushbackReader]
            [java.security MessageDigest]))
 
-(def user-directory (java-io/file (System/getProperty "user.home")))
-
-(def bill-directory (java-io/file user-directory ".bill"))
+(def bill-directory (java-io/file util/user-directory ".bill"))
 
 (def bill-repository-directory (java-io/file bill-directory "repository"))
 
@@ -41,7 +40,15 @@
 (defn bill-clj? [dependency-map]
   (when-let [bill-clj-file (bill-clj dependency-map)]
     (.exists bill-clj-file)))
-    
+
+(defn read-bill-clj-file [bill-clj-file]
+  (when (and bill-clj-file (.exists bill-clj-file))
+    (read (PushbackReader. (java-io/reader bill-clj-file)))))
+
 (defn read-bill-clj [dependency-map]
   (when (bill-clj? dependency-map)
-    (read (PushbackReader. (java-io/reader (bill-clj dependency-map))))))
+    (read-bill-clj-file (bill-clj dependency-map))))
+
+(defn write-bill-clj [bill-clj-file bill-clj-map]
+  (.mkdirs (.getParentFile bill-clj-file))
+  (util/write-form bill-clj-file bill-clj-map))

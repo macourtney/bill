@@ -1,9 +1,10 @@
 (ns bill.classpath
   (:require [bill.build :as build]
             [bill.repository :as repository]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
-  (:import [java.io PushbackReader StringWriter]
+  (:import [java.io PushbackReader]
            [java.security MessageDigest]))
 
 (def default-algorithm "SHA-1")
@@ -91,18 +92,9 @@
         artifact (:artifact dependency-map)]
     [(symbol (if (and group (not (= group artifact))) (str group "/" artifact) artifact))
      (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
-
-(defn serialize-clj [form]
-  (when form
-    (let [string-writer (new StringWriter)]
-      (binding [*print-dup* true]
-        (binding [*out* string-writer]
-          (print form)))
-      (.close string-writer)
-      (.toString string-writer))))
     
 (defn dependency-vector-str [dependency-map]
-  (serialize-clj (dependency-vector dependency-map)))
+  (util/serialize-clj (dependency-vector dependency-map)))
 
 (defn child-dependency-maps [parent-dependency-map]
   (filter identity (map dependency-map (dependencies parent-dependency-map))))
