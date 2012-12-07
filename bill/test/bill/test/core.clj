@@ -34,7 +34,7 @@
           [& args]
           (is (= args ["Args" "test."])))))
 
-    (is (= { :project ['org.bill/bill project-version] :description description }
+    (is (= (merge build/build-defaults { :description description :project ['org.bill/bill project-version] })
            (build/build)))
     (is (classloader))
     (run-target-in-classloader :args-test ["Args" "test."])

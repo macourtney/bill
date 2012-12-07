@@ -2,6 +2,7 @@
   (:use bill.target)
   (:require [bill.classpath :as classpath]
             [bill.repository :as repository]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.tools.cli :as cli :only [cli]])
   (:import [java.io PushbackReader StringWriter]))
@@ -80,7 +81,7 @@
   ([options args] (create-hash options args (find-algorithm options)))
   ([options args algorithm]
     (when-let [file (create-file options args)]
-      (classpath/hash-code file algorithm))))
+      (util/hash-code file algorithm))))
 
 (defn options-bill-clj-map [options args]
   { :group (find-group options)

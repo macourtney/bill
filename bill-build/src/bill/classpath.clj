@@ -8,8 +8,6 @@
            [java.security MessageDigest]))
 
 (def default-algorithm "SHA-1")
-(def default-chunk-size 1024)
-(def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 
 (defn parse-hash-vector [hash-vector]
   (cond
@@ -34,42 +32,6 @@
           (parse-hash-vector dependency-vector)))
       dependency-vector)))
 
-(defn read-byte-chunk
-  ([input-stream] (read-byte-chunk input-stream default-chunk-size))
-  ([input-stream buffer-size]
-    (let [buffer (byte-array buffer-size)
-          bytes-read (.read input-stream buffer 0 buffer-size)]
-      (cond
-        (= bytes-read buffer-size) buffer
-        (< bytes-read 0) nil
-        (< bytes-read buffer-size) (byte-array bytes-read buffer)
-        :else (throw (RuntimeException. (str "Invalid number of bytes read: " bytes-read)))))))
-
-(defn read-bytes
-  ([input-stream] (read-bytes input-stream default-chunk-size))
-  ([input-stream buffer-size]
-    (take-while identity (repeatedly #(read-byte-chunk input-stream buffer-size)))))
-
-(defn encode-hex-byte [byte]
-  [(nth hex-digits (bit-and 15 (bit-shift-right byte 4)))
-   (nth hex-digits (bit-and 15 byte))])
-    
-(defn encode-hex [bytes]
-  (when bytes
-    (string/join "" (mapcat encode-hex-byte bytes))))
-
-(defn hash-code [file algorithm]
-  (when (and file algorithm (.exists file))
-    (let [message-digest (MessageDigest/getInstance algorithm)]
-      (.reset message-digest)
-      (with-open [file-stream (java-io/input-stream file)]
-        (doseq [file-bytes (read-bytes file-stream)]
-          (.update message-digest file-bytes)))
-      (encode-hex (.digest message-digest)))))
-      
-(defn validate-hash [file algorithm file-hash]
-  (= file-hash (hash-code file algorithm)))
-
 (defn assure-hash-directory [algorithm hash]
   (let [hash-directory (repository/bill-hash-directory { :algorithm algorithm :hash hash })]
     (when (not (.exists hash-directory))
@@ -79,7 +41,7 @@
 (defn move-to-repository
   ([jar-file] (move-to-repository jar-file default-algorithm))
   ([jar-file algorithm]
-    (let [file-hash (hash-code jar-file algorithm)
+    (let [file-hash (util/hash-code jar-file algorithm)
           hash-directory (assure-hash-directory algorithm file-hash)]
       (java-io/copy jar-file (java-io/file hash-directory (.getName jar-file))))))
 
@@ -92,7 +54,7 @@
         artifact (:artifact dependency-map)]
     [(symbol (if (and group (not (= group artifact))) (str group "/" artifact) artifact))
      (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
-    
+
 (defn dependency-vector-str [dependency-map]
   (util/serialize-clj (dependency-vector dependency-map)))
 
