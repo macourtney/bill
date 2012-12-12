@@ -13,7 +13,7 @@
      ["-g" "--group" "The group id."]
      ["-a" "--artifact" "The artifact id."]
      ["-v" "--version" "The version."]
-     ["-l" "--algorithm" "The hash algorithm to use." :default "SHA-1"]
+     ["-l" "--algorithm" "The hash algorithm to use." :default util/default-algorithm]
      ["-d" "--dependencies" "The dependency vector to use."]
      ["-c" "--clj" "The clj file to use."]))
 
