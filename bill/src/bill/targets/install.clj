@@ -12,21 +12,34 @@
       jar-file)))
   
 (defn bill-clj-map []
-  (let [algorithm (build/hash-algorithm)]
-    { :hash (util/hash-code (find-jar-file) algorithm)
-      :algorithm algorithm
-      :group (build/group-id)
-      :artifact (build/artifact-id)
-      :version (build/version)
-      :dependencies (build/dependencies) }))
-  
+  (when-let [jar-file (find-jar-file)]
+    (let [algorithm (build/hash-algorithm)]
+      { :group (build/group-id)
+        :artifact (build/artifact-id)
+        :version (build/version)
+        :dependencies (build/dependencies)
+        :jar { :name (.getName jar-file)
+               :hash (util/hash-code jar-file algorithm)
+               :algorithm algorithm } })))
+
+(defn create-target-bill-clj [clj-map]
+  (let [target-bill-clj (repository/target-bill-clj clj-map)]
+    (.mkdirs (.getParentFile target-bill-clj))
+    (repository/write-bill-clj target-bill-clj clj-map)
+    target-bill-clj))
+
+(defn create-repository-jar [dependency-map]
+  (let [repository-bill-jar (repository/bill-jar dependency-map)]
+    (.mkdirs (.getParentFile repository-bill-jar))
+    (java-io/copy (find-jar-file) repository-bill-jar)))
+
 (defn install-jar [jar-file]
   (let [clj-map (bill-clj-map)
-        repository-bill-jar (repository/bill-jar clj-map)]
-    (.mkdirs (.getParentFile repository-bill-jar))
-    (java-io/copy (find-jar-file) repository-bill-jar)
-    (repository/write-bill-clj (repository/bill-clj clj-map) clj-map)
-    (println "Installed as:" (classpath/dependency-vector-str clj-map))))
+        target-bill-clj (create-target-bill-clj clj-map)
+        dependency-map (repository/target-bill-clj-dependency-map clj-map)]
+    (create-repository-jar dependency-map)
+    (java-io/copy target-bill-clj (repository/bill-clj dependency-map))
+    (println "Installed as:" (repository/target-bill-clj-dependency-vector clj-map))))
 
 (deftarget install [& args]
   (if-let [jar-file (find-jar-file)]

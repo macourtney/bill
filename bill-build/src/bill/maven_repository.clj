@@ -2,6 +2,7 @@
   (:require [bill.build :as build]
             [bill.repository :as repository]
             [bill.util :as util]
+            [bill.xml :as xml]
             [clojure.java.io :as java-io]
             [clojure.string :as string])
   (:import [java.io PushbackReader]
@@ -42,3 +43,10 @@
 (defn maven-pom? [dependency-map]
   (when-let [maven-pom-file (maven-pom dependency-map)]
     (.exists maven-pom-file)))
+
+(defn project-element [dependency-map]
+  (xml/parse (maven-pom dependency-map)))
+
+(defn convert-to-bill-clj [dependency-map]
+  (when-let [pom-element (project-element dependency-map)]
+    ))

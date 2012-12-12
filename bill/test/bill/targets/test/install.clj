@@ -34,33 +34,40 @@
     (java-io/copy (java-io/file test-jar-path) test-target-jar)
     (try
       (is (= (bill-clj-map)
-              { :hash hash-code
-                :algorithm algorithm
-                :group group
+              { :group group
                 :artifact artifact
                 :version version
-                :dependencies dependencies-vector }))
+                :dependencies dependencies-vector
+                :jar { :name test-jar-name
+                       :hash hash-code
+                       :algorithm algorithm } }))
       (finally
         (.delete test-target-jar)
         (build/build! build/build-defaults)))))
 
-(deftest test-bill-clj-map
+(deftest test-install-jar
   (let [test-target-jar (java-io/file (build/target-path) test-jar-name)]
     (build/build! (merge build/build-defaults { :project project-vector :dependencies dependencies-vector }))
     (java-io/copy (java-io/file test-jar-path) test-target-jar)
     (try
       (let [clj-map (bill-clj-map)
-            repository-bill-jar (repository/bill-jar clj-map)
-            repository-bill-clj (repository/bill-clj clj-map)]
+            target-bill-clj (repository/target-bill-clj clj-map)]
+        (is (not (.exists target-bill-clj)))
         (install-jar test-target-jar)
-        (is (.exists repository-bill-jar))
-        (is (.exists repository-bill-clj))
-        (.delete repository-bill-jar)
-        (.delete repository-bill-clj)
-        (.delete (.getParentFile repository-bill-jar))
-        (is (not (.exists repository-bill-jar)))
-        (is (not (.exists repository-bill-clj)))
-        (is (not (.exists (.getParentFile repository-bill-jar)))))
+        (is (.exists target-bill-clj))
+        (let [dependency-map (repository/target-bill-clj-dependency-map clj-map)
+              repository-bill-jar (repository/bill-jar dependency-map)
+              repository-bill-clj (repository/bill-clj dependency-map)]
+          (is (.exists repository-bill-jar))
+          (is (.exists repository-bill-clj))
+          (.delete repository-bill-jar)
+          (.delete repository-bill-clj)
+          (.delete (.getParentFile repository-bill-jar))
+          (.delete target-bill-clj)
+          (is (not (.exists repository-bill-jar)))
+          (is (not (.exists repository-bill-clj)))
+          (is (not (.exists (.getParentFile repository-bill-jar))))
+          (is (not (.exists target-bill-clj)))))
       (finally
         (.delete test-target-jar)
         (build/build! build/build-defaults)))))

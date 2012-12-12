@@ -57,15 +57,15 @@
 
 (deftest test-create-dependency-map
   (is (= (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash md5-hash-code :dependencies nil }))
+          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "9ad3a2ff9f123f3552f7fa6597e433ec" }))
   (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
-          { :group artifact :artifact artifact :version version :algorithm algorithm :hash hash-code :dependencies nil })))
+          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "28a7a58e17f74080494f6b33e0bad5d179c07806" })))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])
-          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash md5-hash-code :dependencies dependencies-vector }))
+          { :group group :artifact artifact :version version :jar { :name (str artifact "-" version ".jar") :algorithm md5-algorithm :hash md5-hash-code } :dependencies dependencies-vector }))
   (is (= (create-bill-clj-map { :artifact artifact :version version :algorithm algorithm :dependencies dependencies } [test-jar-path])
-          { :group artifact :artifact artifact :version version :algorithm algorithm :hash hash-code :dependencies dependencies-vector })))
+          { :group artifact :artifact artifact :version version :jar { :name (str artifact "-" version ".jar") :algorithm algorithm :hash hash-code } :dependencies dependencies-vector })))
 
 (deftest test-update-repository
   (let [options { :artifact artifact :version version :algorithm algorithm :dependencies dependencies }

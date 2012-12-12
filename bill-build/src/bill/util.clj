@@ -4,6 +4,7 @@
   (:import [java.io StringWriter]
            [java.security MessageDigest]))
 
+(def default-algorithm "SHA-1")
 (def user-directory (java-io/file (System/getProperty "user.home")))
 (def default-chunk-size 1024)
 (def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
@@ -57,3 +58,13 @@
       
 (defn validate-hash [file algorithm file-hash]
   (= file-hash (hash-code file algorithm)))
+
+(defn dependency-vector [dependency-map]
+  (let [group (:group dependency-map)
+        artifact (:artifact dependency-map)
+        group-artifact-str (if (and group (not (= group artifact))) (str group "/" artifact) artifact)]
+    [(when group-artifact-str (symbol group-artifact-str))
+     (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
+
+(defn dependency-vector-str [dependency-map]
+  (serialize-clj (dependency-vector dependency-map)))

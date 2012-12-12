@@ -23,6 +23,10 @@
 (defn create-file [options args]
   (when-let [file-path (find-file-path options args)]
     (java-io/file file-path)))
+
+(defn file-name [options args]
+  (when-let [file (create-file options args)]
+    (.getName file)))
     
 (defn find-artifact [options]
   (:artifact options))
@@ -89,39 +93,55 @@
     :version (find-version options)
     :dependencies (find-dependencies-vector options) })
 
+(defn bill-clj-algorithm [options bill-clj-map]
+  (or (:algorithm (:jar bill-clj-map)) (find-algorithm options) util/default-algorithm))
+    
 (defn update-bill-clj-map-hash [options args bill-clj-map]
-  (let [algorithm (or (:algorithm bill-clj-map) (find-algorithm options))]
-    (merge bill-clj-map
-      { :algorithm algorithm
-        :hash (create-hash options args algorithm) })))
+  (let [algorithm (bill-clj-algorithm options bill-clj-map)]
+    (merge
+      (dissoc bill-clj-map :algorithm)
+      { :jar { :name (file-name options args)
+               :algorithm algorithm
+               :hash (create-hash options args algorithm) } })))
 
 (defn create-bill-clj-map [options args]
   (update-bill-clj-map-hash options args
     (merge (options-bill-clj-map options args) (file-bill-clj-map options))))
 
+(defn write-temp-bill-clj [options args]
+  (when-let [bill-clj-map (create-bill-clj-map options args)]
+    (let [temp-bill-clj (repository/temp-bill-clj bill-clj-map)]
+      (repository/write-bill-clj temp-bill-clj bill-clj-map)
+      temp-bill-clj)))
+
 (defn create-dependency-map [options args]
-  (create-bill-clj-map options args))
+  (when-let [temp-bill-clj (write-temp-bill-clj options args)]
+    (let [bill-clj-map (repository/read-bill-clj-file temp-bill-clj)
+          algorithm (bill-clj-algorithm options bill-clj-map)]
+      (merge
+        (select-keys bill-clj-map [:group :artifact :version])
+        { :algorithm algorithm
+          :hash (util/hash-code temp-bill-clj algorithm) }))))
 
-(defn write-bill-clj [options args]
-  (let [dependency-map (create-dependency-map options args)
-        bill-clj (repository/bill-clj dependency-map)]
-    (repository/write-bill-clj bill-clj (create-bill-clj-map options args))
-    (.mkdirs (.getParentFile bill-clj))))
+(defn write-bill-clj [dependency-map]
+  (when-let [bill-clj (repository/bill-clj dependency-map)]
+    (.mkdirs (.getParentFile bill-clj))
+    (java-io/copy (repository/temp-bill-clj dependency-map) bill-clj)))
 
-(defn copy-bill-jar [options args]
-  (let [file (create-file options args)
-        dependency-map (create-dependency-map options args)
-        bill-jar (repository/bill-jar dependency-map)]
-    (.mkdirs (.getParentFile bill-jar))
-    (java-io/copy file bill-jar)))
+(defn copy-bill-jar [options args dependency-map]
+  (let [file (create-file options args)]
+    (when-let [bill-jar (repository/bill-jar dependency-map)]
+      (.mkdirs (.getParentFile bill-jar))
+      (java-io/copy file bill-jar))))
     
-(defn print-results [options args]
-  (println "Installed as:" (classpath/dependency-vector-str (create-dependency-map options args))))
+(defn print-results [dependency-map]
+  (println "Installed as:" (util/dependency-vector-str dependency-map)))
 
 (defn update-repository [options args]
-  (copy-bill-jar options args)
-  (write-bill-clj options args)
-  (print-results options args))
+  (let [dependency-map (create-dependency-map options args)]
+    (copy-bill-jar options args dependency-map)
+    (write-bill-clj dependency-map)
+    (print-results dependency-map)))
   
 (deftarget install-file [& args]
   (let [[options args banner] (parse-args args)]

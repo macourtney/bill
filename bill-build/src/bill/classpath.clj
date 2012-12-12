@@ -7,12 +7,10 @@
   (:import [java.io PushbackReader]
            [java.security MessageDigest]))
 
-(def default-algorithm "SHA-1")
-
 (defn parse-hash-vector [hash-vector]
   (cond
     (second hash-vector) { :algorithm (first hash-vector) :hash (second hash-vector) }
-    (first hash-vector) { :algorithm default-algorithm :hash (first hash-vector) }))
+    (first hash-vector) { :algorithm util/default-algorithm :hash (first hash-vector) }))
 
 (defn parse-dependency-symbol [dependency-symbol]
   (when dependency-symbol
@@ -39,7 +37,7 @@
     hash-directory))
 
 (defn move-to-repository
-  ([jar-file] (move-to-repository jar-file default-algorithm))
+  ([jar-file] (move-to-repository jar-file util/default-algorithm))
   ([jar-file algorithm]
     (let [file-hash (util/hash-code jar-file algorithm)
           hash-directory (assure-hash-directory algorithm file-hash)]
@@ -49,14 +47,6 @@
   (when-let [bill-clj-map (repository/read-bill-clj dependency-map)]
     (:dependencies bill-clj-map)))
 
-(defn dependency-vector [dependency-map]
-  (let [group (:group dependency-map)
-        artifact (:artifact dependency-map)]
-    [(symbol (if (and group (not (= group artifact))) (str group "/" artifact) artifact))
-     (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
-
-(defn dependency-vector-str [dependency-map]
-  (util/serialize-clj (dependency-vector dependency-map)))
 
 (defn child-dependency-maps [parent-dependency-map]
   (filter identity (map dependency-map (dependencies parent-dependency-map))))
