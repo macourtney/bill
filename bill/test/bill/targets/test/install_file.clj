@@ -7,15 +7,17 @@
             [bill.target :as target]
             [bill.util :as util]))
 
+(def new-line (System/getProperty "line.separator"))
+
 (def test-jar-path "test-resources/test-1.0.0.jar")
-(def usage "Usage:\n\n Switches            Default  Desc                          \n --------            -------  ----                          \n -f, --file                   The file to load              \n -g, --group                  The group id.                 \n -a, --artifact               The artifact id.              \n -v, --version                The version.                  \n -l, --algorithm     SHA-1    The hash algorithm to use.    \n -d, --dependencies           The dependency vector to use. \n -c, --clj                    The clj file to use.          \n")
+(def usage (str "Usage:" new-line new-line " Switches            Default  Desc                          " new-line " --------            -------  ----                          " new-line " -f, --file                   The file to load              " new-line " -g, --group                  The group id.                 " new-line " -a, --artifact               The artifact id.              " new-line " -v, --version                The version.                  " new-line " -l, --algorithm     SHA-1    The hash algorithm to use.    " new-line " -d, --dependencies           The dependency vector to use. " new-line " -c, --clj                    The clj file to use.          " new-line))
 (def algorithm "SHA-1")
 (def md5-algorithm "MD5")
 (def group "org.test")
 (def artifact "test")
 (def version "1.0.0")
-(def hash-code "da1fbf7e57c838f2a9412778ee97b833c53d9137")
-(def md5-hash-code "975d8e1e430f07527155dd40e5c783d8")
+(def hash-code "95dc3031817c0b7a520872d249b96d0ea0d9d044")
+(def md5-hash-code "4ed4528a6f2f35c6f9693bc5b49e4ec7")
 (def dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]])
 (def dependencies (util/serialize-clj dependencies-vector))
 (def test-clj "test-resources/test-1.0.0.clj")
@@ -57,15 +59,15 @@
 
 (deftest test-create-dependency-map
   (is (= (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "9ad3a2ff9f123f3552f7fa6597e433ec" }))
+          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "844543e1fd6c7f3564296903314f9eef" }))
   (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
-          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "28a7a58e17f74080494f6b33e0bad5d179c07806" })))
+          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "bbb9c95bb3c15e3c5bd6259e5a8fbfb3c5ad1cf9" })))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])
-          { :group group :artifact artifact :version version :jar { :name (str artifact "-" version ".jar") :algorithm md5-algorithm :hash md5-hash-code } :dependencies dependencies-vector }))
+          { :group group :artifact artifact :version version :file { :name (str artifact "-" version ".jar") :algorithm md5-algorithm :hash md5-hash-code } :dependencies dependencies-vector }))
   (is (= (create-bill-clj-map { :artifact artifact :version version :algorithm algorithm :dependencies dependencies } [test-jar-path])
-          { :group artifact :artifact artifact :version version :jar { :name (str artifact "-" version ".jar") :algorithm algorithm :hash hash-code } :dependencies dependencies-vector })))
+          { :group artifact :artifact artifact :version version :file { :name (str artifact "-" version ".jar") :algorithm algorithm :hash hash-code } :dependencies dependencies-vector })))
 
 (deftest test-update-repository
   (let [options { :artifact artifact :version version :algorithm algorithm :dependencies dependencies }

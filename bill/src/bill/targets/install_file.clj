@@ -27,10 +27,10 @@
 (defn file-name [options args]
   (when-let [file (create-file options args)]
     (.getName file)))
-    
+
 (defn find-artifact [options]
   (:artifact options))
-  
+
 (defn find-group [options]
   (or (:group options) (find-artifact options)))
 
@@ -94,15 +94,15 @@
     :dependencies (find-dependencies-vector options) })
 
 (defn bill-clj-algorithm [options bill-clj-map]
-  (or (:algorithm (:jar bill-clj-map)) (find-algorithm options) util/default-algorithm))
-    
+  (or (:algorithm (:file bill-clj-map)) (find-algorithm options) util/default-algorithm))
+
 (defn update-bill-clj-map-hash [options args bill-clj-map]
   (let [algorithm (bill-clj-algorithm options bill-clj-map)]
     (merge
       (dissoc bill-clj-map :algorithm)
-      { :jar { :name (file-name options args)
-               :algorithm algorithm
-               :hash (create-hash options args algorithm) } })))
+      { :file { :name (file-name options args)
+                :algorithm algorithm
+                :hash (create-hash options args algorithm) } })))
 
 (defn create-bill-clj-map [options args]
   (update-bill-clj-map-hash options args

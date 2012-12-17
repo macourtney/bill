@@ -4,7 +4,7 @@
         bill.maven-repository)
   (:require [bill.build :as build]
             [bill.classpath :as classpath]
-            [bill.repository :as repository]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
@@ -60,7 +60,7 @@
   
 (defn assert-maven-jar [clojure-dependency-map]
   (let [clojure-jar (maven-jar clojure-dependency-map)]
-    (is (= (str (repository/file-name clojure-dependency-map) ".jar") (.getName clojure-jar)))
+    (is (= (str (util/file-name clojure-dependency-map) ".jar") (.getName clojure-jar)))
     (is (= (maven-version-directory clojure-dependency-map) (.getParentFile clojure-jar)))))
 
 (deftest test-maven-jar
@@ -75,7 +75,7 @@
   
 (defn assert-maven-pom [clojure-dependency-map]
   (let [clojure-pom (maven-pom clojure-dependency-map)]
-    (is (= (str (repository/file-name clojure-dependency-map) ".pom") (.getName clojure-pom)))
+    (is (= (str (util/file-name clojure-dependency-map) ".pom") (.getName clojure-pom)))
     (is (= (maven-version-directory clojure-dependency-map) (.getParentFile clojure-pom)))))
 
 (deftest test-maven-pom
@@ -87,3 +87,15 @@
   (is (maven-pom? { :group clojure-group :artifact clojure-artifact :version clojure-version }))
   (is (maven-pom? { :group (keyword clojure-group) :artifact (keyword clojure-artifact) :version (keyword clojure-version) }))
   (is (not (maven-pom? { :group :fail :artifact :fail :version :1.0.0 }))))
+
+(deftest test-convert-to-bill-clj
+  (let [dependency-map { :group clojure-group :artifact clojure-artifact :version clojure-version }]
+    (is (= (convert-to-bill-clj dependency-map)
+         { :group clojure-group
+           :artifact clojure-artifact
+           :version clojure-version
+           :file { :name (str clojure-artifact "-" clojure-version ".jar")
+                   :algorithm util/default-algorithm
+                   :hash (util/hash-code (maven-jar dependency-map) util/default-algorithm) }
+
+           :dependencies []}))))

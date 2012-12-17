@@ -4,6 +4,7 @@
         bill.repository)
   (:require [bill.build :as build]
             [bill.classpath :as classpath]
+            [bill.util :as util]
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
@@ -21,19 +22,12 @@
 (def clojure-clj-map { :group "org.clojure"
                        :artifact "clojure"
                        :version "1.4.0"
-                       :algorithm "SHA-1"
-                       :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"
- 
-                       :dependencies [] })
-(def test-clj (java-io/file "test/clojure-1.4.0.clj"))
 
-(deftest test-file-name
-  (is (= (file-name { :artifact clojure-artifact :version clojure-version }) "clojure-1.4.0"))
-  (is (= (file-name { :artifact (keyword clojure-artifact) :version (keyword clojure-version) }) "clojure-1.4.0"))
-  (is (nil? (file-name { :artifact (keyword clojure-artifact) })))
-  (is (nil? (file-name { :version (keyword clojure-version) })))
-  (is (nil? (file-name {})))
-  (is (nil? (file-name nil))))
+                       :jar { :name "clojure-1.4.0.jar"
+                              :algorithm "SHA-1"
+                              :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" } })
+
+(def test-clj (java-io/file "test/clojure-1.4.0.clj"))
 
 (deftest test-bill-directory
   (is bill-directory)
@@ -75,7 +69,7 @@
   
 (defn assert-bill-jar [clojure-dependency-map]
   (let [clojure-jar (bill-jar clojure-dependency-map)]
-    (is (= (str (file-name clojure-dependency-map) ".jar") (.getName clojure-jar)))
+    (is (= (str (util/file-name clojure-dependency-map) ".jar") (.getName clojure-jar)))
     (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-jar)))))
 
 (deftest test-bill-jar
@@ -90,7 +84,7 @@
 
 (defn assert-bill-clj [clojure-dependency-map]
   (let [clojure-clj (bill-clj clojure-dependency-map)]
-    (is (= (str (file-name clojure-dependency-map) ".clj") (.getName clojure-clj)))
+    (is (= (str (util/file-name clojure-dependency-map) ".clj") (.getName clojure-clj)))
     (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-clj)))))
   
 (deftest test-bill-clj

@@ -17,7 +17,7 @@
     (let [artifact (name dependency-symbol)]
       { :group (or (namespace dependency-symbol) artifact)
         :artifact artifact })))
-    
+
 (defn dependency-map [dependency-vector]
   (when dependency-vector
     (if (or (vector? dependency-vector) (list? dependency-vector))
@@ -47,10 +47,9 @@
   (when-let [bill-clj-map (repository/read-bill-clj dependency-map)]
     (:dependencies bill-clj-map)))
 
-
 (defn child-dependency-maps [parent-dependency-map]
   (filter identity (map dependency-map (dependencies parent-dependency-map))))
-      
+
 (defn group-artifact-str [dependency-map]
   (when dependency-map
     (when-let [artifact (:artifact dependency-map)]

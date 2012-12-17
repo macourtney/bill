@@ -1,6 +1,5 @@
 (ns bill.maven-repository
   (:require [bill.build :as build]
-            [bill.repository :as repository]
             [bill.util :as util]
             [bill.xml :as xml]
             [clojure.java.io :as java-io]
@@ -29,7 +28,7 @@
 (defn maven-jar [{ :keys [artifact version] :as dependency-map }]
   (when (and artifact version)
     (when-let [version-directory (maven-version-directory dependency-map)]
-      (java-io/file version-directory (str (repository/file-name dependency-map) ".jar")))))
+      (java-io/file version-directory (str (util/file-name dependency-map) ".jar")))))
       
 (defn maven-jar? [dependency-map]
   (when-let [maven-jar-file (maven-jar dependency-map)]
@@ -38,7 +37,7 @@
 (defn maven-pom [{ :keys [artifact version] :as dependency-map }]
   (when (and artifact version)
     (when-let [version-directory (maven-version-directory dependency-map)]
-      (java-io/file version-directory (str (repository/file-name dependency-map) ".pom")))))
+      (java-io/file version-directory (str (util/file-name dependency-map) ".pom")))))
       
 (defn maven-pom? [dependency-map]
   (when-let [maven-pom-file (maven-pom dependency-map)]
@@ -47,6 +46,36 @@
 (defn project-element [dependency-map]
   (xml/parse (maven-pom dependency-map)))
 
+(defn pom-group [pom-element]
+  (first (xml/text (xml/find-child pom-element :groupId))))
+
+(defn pom-artifact [pom-element]
+  (first (xml/text (xml/find-child pom-element :artifactId))))
+
+(defn pom-version [pom-element]
+  (first (xml/text (xml/find-child pom-element :version))))
+
+(defn add-jar [dependency-map algorithm]
+  (let [algorithm (or algorithm util/default-algorithm)]
+    (assoc dependency-map :file { :name (str (util/file-name dependency-map) ".jar")
+                                 :algorithm algorithm
+                                 :hash (util/hash-code (maven-jar dependency-map) algorithm) })))
+
+(defn pom-dependency [dependency-element]
+  (util/dependency-vector
+    { :group (pom-group dependency-element)
+      :artifact (pom-artifact dependency-element)
+      :version (pom-version dependency-element) }))
+
+(defn pom-dependencies [pom-element]
+  (map pom-dependency (xml/find-children (xml/find-child pom-element :dependencies) :dependency)))
+
 (defn convert-to-bill-clj [dependency-map]
   (when-let [pom-element (project-element dependency-map)]
-    ))
+    (let [artifact (pom-artifact pom-element)
+          version (pom-version pom-element)
+          bill-clj-map (add-jar { :group (pom-group pom-element)
+                                  :artifact artifact
+                                  :version version }
+                                (:algorithm dependency-map))]
+      (assoc bill-clj-map :dependencies (pom-dependencies pom-element)))))

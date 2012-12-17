@@ -68,3 +68,7 @@
 
 (defn dependency-vector-str [dependency-map]
   (serialize-clj (dependency-vector dependency-map)))
+
+(defn file-name [{ :keys [artifact version] :as dependency-map }]
+  (when (and artifact version)
+    (str (name artifact) "-" (name version))))

@@ -10,7 +10,7 @@
   (when-let [jar-file (build/target-jar-file)]
     (when (.exists jar-file)
       jar-file)))
-  
+
 (defn bill-clj-map []
   (when-let [jar-file (find-jar-file)]
     (let [algorithm (build/hash-algorithm)]
@@ -18,7 +18,7 @@
         :artifact (build/artifact-id)
         :version (build/version)
         :dependencies (build/dependencies)
-        :jar { :name (.getName jar-file)
+        :file { :name (.getName jar-file)
                :hash (util/hash-code jar-file algorithm)
                :algorithm algorithm } })))
 

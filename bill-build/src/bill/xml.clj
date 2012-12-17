@@ -2,7 +2,8 @@
   (:require [clojure.xml :as xml]))
 
 (defn parse [s]
-  (xml/parse s))
+  (when s
+    (xml/parse s)))
   
 (defn element-name [element]
   (:tag element))

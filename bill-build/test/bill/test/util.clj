@@ -1,28 +1,13 @@
 (ns bill.test.util
-  (:refer-clojure :exclude [clojure-version])
+  (:refer-clojure :exclude [test-utils/clojure-version])
   (:use clojure.test
         bill.util)
   (:require [bill.classpath :as classpath]
             [bill.maven-repository :as maven-repository]
             [bill.repository :as repository]
-            [clojure.java.io :as java-io]))
+            [clojure.java.io :as java-io]
+            test-utils))
 
-(def bill-hash "f05e9c95e2aac37f52c80d57c72890e54f361474")
-(def bill-algorithm "SHA-1")
-(def bill-version "0.0.1-SNAPSHOT")
-(def bill-name 'org.bill/bill-build)
-
-(def bill-dependency [bill-name bill-version bill-algorithm bill-hash])
-(def bill-dependency-map (classpath/dependency-map bill-dependency))
-
-(def clojure-hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9")
-(def clojure-algorithm "SHA-1")
-(def clojure-version "1.4.0")
-(def clojure-name 'org.clojure/clojure)
-            
-(def byte-char-set "UTF-8")
-(def byte-array-class (Class/forName "[B"))
-  
 (deftest test-user-directory
   (is user-directory)
   (is (.exists user-directory)))
@@ -33,20 +18,20 @@
   (is (= (serialize-clj { :foo "bar" }) "#=(clojure.lang.PersistentArrayMap/create {:foo \"bar\"})")))
 
 (deftest test-read-byte-chunk
-  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blah" byte-char-set)) 4)]
+  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blah" test-utils/byte-char-set)) 4)]
     (is (= (count byte-chunk) 4))
-    (is (instance? byte-array-class byte-chunk)))
-  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blahblah" byte-char-set)) 4)]
+    (is (instance? test-utils/byte-array-class byte-chunk)))
+  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blahblah" test-utils/byte-char-set)) 4)]
     (is (= (count byte-chunk) 4))
-    (is (instance? byte-array-class byte-chunk)))
-  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blah" byte-char-set)) 8)]
+    (is (instance? test-utils/byte-array-class byte-chunk)))
+  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blah" test-utils/byte-char-set)) 8)]
     (is (= (count byte-chunk) 4))
-    (is (instance? byte-array-class byte-chunk)))
-  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "" byte-char-set)) 4)]
+    (is (instance? test-utils/byte-array-class byte-chunk)))
+  (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "" test-utils/byte-char-set)) 4)]
     (is (nil? byte-chunk))))
 
 (deftest test-read-bytes
-  (let [byte-seq (doall (read-bytes (java-io/input-stream (.getBytes "blahblah" byte-char-set)) 4))]
+  (let [byte-seq (doall (read-bytes (java-io/input-stream (.getBytes "blahblah" test-utils/byte-char-set)) 4))]
     (is byte-seq)
     (is (= (count byte-seq) 2))
     (doseq [byte-array byte-seq]
@@ -78,13 +63,24 @@
   (is (nil? (encode-hex nil))))
 
 (deftest test-hash-code
-  (let [clojure-jar (maven-repository/maven-jar (classpath/dependency-map [clojure-name clojure-version]))]
+  (let [clojure-jar (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version]))]
     (is clojure-jar)
     (is (.exists clojure-jar))
-    (is (= (hash-code clojure-jar clojure-algorithm) clojure-hash))))
-    
+    (is (= (hash-code clojure-jar test-utils/clojure-algorithm) test-utils/clojure-hash)))
+  (let [bill-jar (repository/bill-jar test-utils/bill-dependency-map)]
+    (is bill-jar)
+    (is (.exists bill-jar))
+    (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-hash))))
+
 (deftest test-validate-hash
-  (is (validate-hash (maven-repository/maven-jar (classpath/dependency-map [clojure-name clojure-version])) clojure-algorithm clojure-hash))
-  (is (validate-hash (repository/bill-jar bill-dependency-map) bill-algorithm bill-hash))
-  (is (not (validate-hash (maven-repository/maven-jar (classpath/dependency-map [clojure-name clojure-version])) clojure-algorithm "fail"))))
-    
+  (is (validate-hash (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm test-utils/clojure-hash))
+  (is (validate-hash (repository/bill-jar test-utils/bill-dependency-map) test-utils/bill-algorithm test-utils/bill-hash))
+  (is (not (validate-hash (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm "fail"))))
+
+(deftest test-file-name
+  (is (= (file-name { :artifact test-utils/clojure-artifact :version test-utils/clojure-version }) "clojure-1.4.0"))
+  (is (= (file-name { :artifact (keyword test-utils/clojure-artifact) :version (keyword test-utils/clojure-version) }) "clojure-1.4.0"))
+  (is (nil? (file-name { :artifact (keyword test-utils/clojure-artifact) })))
+  (is (nil? (file-name { :version (keyword test-utils/clojure-version) })))
+  (is (nil? (file-name {})))
+  (is (nil? (file-name nil))))
