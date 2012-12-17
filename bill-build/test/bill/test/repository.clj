@@ -23,7 +23,7 @@
                        :artifact "clojure"
                        :version "1.4.0"
 
-                       :jar { :name "clojure-1.4.0.jar"
+                       :file { :name "clojure-1.4.0.jar"
                               :algorithm "SHA-1"
                               :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" } })
 

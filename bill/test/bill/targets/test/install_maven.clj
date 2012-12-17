@@ -46,9 +46,9 @@
 
 (deftest test-create-dependency-map
   (is (= (create-dependency-map { :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-         { :algorithm md5-algorithm :hash "25f2919bd258d2bac2e28baab41e3305" :group group :artifact artifact :version version }))
+         { :algorithm md5-algorithm :hash "bcaf5fa5b1a53a0a8cd378a35285f884" :group group :artifact artifact :version version }))
   (is (= (create-dependency-map { :group group :artifact artifact :version version } [])
-         { :algorithm algorithm :hash "88121c5dd827490c5911541d556bc653a1fac324" :group group :artifact artifact :version version })))
+         { :algorithm algorithm :hash "f25fcaa3afe2d96b7cf825dbf9ff6de4a8b514ec" :group group :artifact artifact :version version })))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])

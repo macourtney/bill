@@ -13,7 +13,7 @@
 (def group-artifact (symbol group artifact))
 (def version "1.0.0")
 (def project-vector [group-artifact version])
-(def hash-code "95dc3031817c0b7a520872d249b96d0ea0d9d044")
+(def hash-code "da1fbf7e57c838f2a9412778ee97b833c53d9137")
 (def dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]])
 
 (deftest test-find-jar-file

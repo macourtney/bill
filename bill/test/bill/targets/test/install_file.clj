@@ -16,8 +16,8 @@
 (def group "org.test")
 (def artifact "test")
 (def version "1.0.0")
-(def hash-code "95dc3031817c0b7a520872d249b96d0ea0d9d044")
-(def md5-hash-code "4ed4528a6f2f35c6f9693bc5b49e4ec7")
+(def hash-code "da1fbf7e57c838f2a9412778ee97b833c53d9137")
+(def md5-hash-code "975d8e1e430f07527155dd40e5c783d8")
 (def dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]])
 (def dependencies (util/serialize-clj dependencies-vector))
 (def test-clj "test-resources/test-1.0.0.clj")
@@ -59,9 +59,9 @@
 
 (deftest test-create-dependency-map
   (is (= (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "844543e1fd6c7f3564296903314f9eef" }))
+          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "36811676d3361bd3ab9745a10268438b" }))
   (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
-          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "bbb9c95bb3c15e3c5bd6259e5a8fbfb3c5ad1cf9" })))
+          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "bde3674c6718b89a77bf8d68a880c840b0121e4a" })))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])

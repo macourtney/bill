@@ -1,6 +1,6 @@
 (ns test-utils)
 
-(def bill-hash "c840ba4bb2874cb40109fb536e3e20f348e32725")
+(def bill-hash "c27a754806b3602b3ea119a040597a80729bdd72")
 (def bill-algorithm "SHA-1")
 (def bill-version "0.0.1-SNAPSHOT")
 (def bill-name 'org.bill/bill-build)

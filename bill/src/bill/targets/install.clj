@@ -19,8 +19,8 @@
         :version (build/version)
         :dependencies (build/dependencies)
         :file { :name (.getName jar-file)
-               :hash (util/hash-code jar-file algorithm)
-               :algorithm algorithm } })))
+                :hash (util/hash-code jar-file algorithm)
+                :algorithm algorithm } })))
 
 (defn create-target-bill-clj [clj-map]
   (let [target-bill-clj (repository/target-bill-clj clj-map)]
@@ -39,7 +39,7 @@
         dependency-map (repository/target-bill-clj-dependency-map clj-map)]
     (create-repository-jar dependency-map)
     (java-io/copy target-bill-clj (repository/bill-clj dependency-map))
-    (println "Installed as:" (repository/target-bill-clj-dependency-vector clj-map))))
+    (println "Installed as:" (util/serialize-clj (repository/target-bill-clj-dependency-vector clj-map)))))
 
 (deftarget install [& args]
   (if-let [jar-file (find-jar-file)]
