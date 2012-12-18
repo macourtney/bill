@@ -72,6 +72,12 @@
     (is (.exists bill-jar))
     (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-hash))))
 
+(deftest test-form-hash-code
+  (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "07724ab3490d24cbed7554341c589a558c1b77b4"))
+  (is (= (form-hash-code nil test-utils/clojure-algorithm) "e958f32bf433420ca20f95e2070538739db2c116"))
+  (is (nil? (form-hash-code { :foo "bar" } nil)))
+  (is (nil? (form-hash-code nil nil))))
+
 (deftest test-validate-hash
   (is (validate-hash (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm test-utils/clojure-hash))
   (is (validate-hash (repository/bill-jar test-utils/bill-dependency-map) test-utils/bill-algorithm test-utils/bill-hash))

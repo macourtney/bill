@@ -1,7 +1,7 @@
 (ns bill.util
   (:require [clojure.java.io :as java-io]
             [clojure.string :as string])
-  (:import [java.io StringWriter]
+  (:import [java.io ByteArrayOutputStream File OutputStreamWriter StringWriter]
            [java.security MessageDigest]))
 
 (def default-algorithm "SHA-1")
@@ -18,10 +18,16 @@
       (.close string-writer)
       (.toString string-writer))))
 
-(defn write-form [file form]
-  (with-open [bill-clj-writer (java-io/writer file)]
+(defn write-form [writer form]
+  (with-open [bill-clj-writer (java-io/writer writer)]
     (binding [*out* bill-clj-writer]
       (println (serialize-clj form)))))
+
+(defn form-bytes [form]
+  (with-open [byte-array-output-stream (new ByteArrayOutputStream)
+              stream-writer (OutputStreamWriter. byte-array-output-stream)]
+    (write-form stream-writer form)
+    (.toByteArray byte-array-output-stream)))
 
 (defn read-byte-chunk
   ([input-stream] (read-byte-chunk input-stream default-chunk-size))
@@ -47,17 +53,27 @@
   (when bytes
     (string/join "" (mapcat encode-hex-byte bytes))))
 
-(defn hash-code [file algorithm]
-  (when (and file algorithm (.exists file))
+(defn validate-input-stream [input-stream]
+  (when input-stream
+    (if (instance? File input-stream)
+      (when (.exists input-stream)
+        input-stream)
+      input-stream)))
+
+(defn hash-code [input-stream algorithm]
+  (when (and (validate-input-stream input-stream) algorithm)
     (let [message-digest (MessageDigest/getInstance algorithm)]
       (.reset message-digest)
-      (with-open [file-stream (java-io/input-stream file)]
+      (with-open [file-stream (java-io/input-stream input-stream)]
         (doseq [file-bytes (read-bytes file-stream)]
           (.update message-digest file-bytes)))
       (encode-hex (.digest message-digest)))))
       
-(defn validate-hash [file algorithm file-hash]
-  (= file-hash (hash-code file algorithm)))
+(defn validate-hash [input-stream algorithm file-hash]
+  (= file-hash (hash-code input-stream algorithm)))
+
+(defn form-hash-code [form algorithm]
+  (hash-code (form-bytes form) algorithm))
 
 (defn dependency-vector [dependency-map]
   (let [group (:group dependency-map)

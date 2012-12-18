@@ -58,24 +58,29 @@
 (defn add-jar [dependency-map algorithm]
   (let [algorithm (or algorithm util/default-algorithm)]
     (assoc dependency-map :file { :name (str (util/file-name dependency-map) ".jar")
-                                 :algorithm algorithm
-                                 :hash (util/hash-code (maven-jar dependency-map) algorithm) })))
+                                  :algorithm algorithm
+                                  :hash (util/hash-code (maven-jar dependency-map) algorithm) })))
 
-(defn pom-dependency [dependency-element]
-  (util/dependency-vector
-    { :group (pom-group dependency-element)
-      :artifact (pom-artifact dependency-element)
-      :version (pom-version dependency-element) }))
+(declare convert-to-bill-clj)
 
-(defn pom-dependencies [pom-element]
-  (map pom-dependency (xml/find-children (xml/find-child pom-element :dependencies) :dependency)))
+(defn pom-dependency [dependency-element algorithm]
+  (let [dependency-map { :group (pom-group dependency-element)
+                         :artifact (pom-artifact dependency-element)
+                         :version (pom-version dependency-element) }
+        bill-clj (convert-to-bill-clj dependency-map)
+        hash-code (util/form-hash-code bill-clj algorithm)]
+    (util/dependency-vector (merge dependency-map { :algorithm algorithm :hash hash-code }))))
+
+(defn pom-dependencies [pom-element algorithm]
+  (map #(pom-dependency % algorithm) (xml/find-children (xml/find-child pom-element :dependencies) :dependency)))
 
 (defn convert-to-bill-clj [dependency-map]
   (when-let [pom-element (project-element dependency-map)]
     (let [artifact (pom-artifact pom-element)
           version (pom-version pom-element)
+          algorithm (or (:algorithm dependency-map) util/default-algorithm)
           bill-clj-map (add-jar { :group (pom-group pom-element)
                                   :artifact artifact
                                   :version version }
-                                (:algorithm dependency-map))]
-      (assoc bill-clj-map :dependencies (pom-dependencies pom-element)))))
+                                algorithm)]
+      (assoc bill-clj-map :dependencies (pom-dependencies pom-element algorithm)))))

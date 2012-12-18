@@ -63,7 +63,9 @@
     :version (find-version options) })
 
 (defn create-bill-clj-map [options args]
-  (merge (options-bill-clj-map options args) (maven-repository/convert-to-bill-clj options)))
+  (merge
+    (options-bill-clj-map options args)
+    (maven-repository/convert-to-bill-clj (assoc options :group (find-group options)))))
 
 (defn write-temp-bill-clj [options args]
   (when-let [bill-clj-map (create-bill-clj-map options args)]

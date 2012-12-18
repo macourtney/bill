@@ -62,9 +62,12 @@
         bill-jar-file (repository/bill-jar dependency-map)
         bill-clj-file (repository/bill-clj dependency-map)]
     (try
-      (is (not (when bill-clj-file (.exists bill-clj-file))))
-      (is (not (when bill-jar-file (.exists bill-jar-file))))
-      (is (not (when hash-directory (.exists hash-directory))))
+      (when (and bill-clj-file (.exists bill-clj-file))
+        (.delete bill-clj-file))
+      (when (and bill-jar-file (.exists bill-jar-file))
+        (.delete bill-jar-file))
+      (when (and hash-directory (.exists hash-directory))
+        (.delete hash-directory))
       (update-repository options args)
       (is (when hash-directory (.exists hash-directory)))
       (is (when bill-jar-file (.exists bill-jar-file)))
