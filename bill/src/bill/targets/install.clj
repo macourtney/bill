@@ -39,7 +39,7 @@
         dependency-map (repository/target-bill-clj-dependency-map clj-map)]
     (create-repository-jar dependency-map)
     (java-io/copy target-bill-clj (repository/bill-clj dependency-map))
-    (println "Installed as:" (util/serialize-clj (repository/target-bill-clj-dependency-vector clj-map)))))
+    (println "Installed:" (util/serialize-clj (repository/target-bill-clj-dependency-vector clj-map)))))
 
 (deftarget install [& args]
   (if-let [jar-file (find-jar-file)]
