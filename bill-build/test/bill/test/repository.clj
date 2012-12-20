@@ -16,7 +16,7 @@
             
 (def clojure-dependency [clojure-name clojure-version clojure-algorithm clojure-hash])
             
-(def clojure-dependency-map (classpath/dependency-map clojure-dependency))
+(def clojure-dependency-map (util/dependency-map clojure-dependency))
 (def fail-dependency-map { :artifact :fail :version :1.0.0 :algorithm "SHA-1" :hash :fail })
 
 (def clojure-clj-map { :group "org.clojure"

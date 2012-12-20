@@ -38,26 +38,26 @@
   (is (not (validate-version {}))))
 
 (deftest test-validate-args
-  (is (validate-args { :group group :artifact artifact :version version } []))
-  (is (validate-args { :artifact artifact :version version } []))
-  (is (not (validate-args { :artifact artifact } [])))
-  (is (not (validate-args { :version version } [])))
-  (is (not (validate-args {} []))))
+  (is (validate-args { :group group :artifact artifact :version version }))
+  (is (validate-args { :artifact artifact :version version }))
+  (is (not (validate-args { :artifact artifact })))
+  (is (not (validate-args { :version version })))
+  (is (not (validate-args {}))))
 
 (deftest test-create-dependency-map
-  (is (= (create-dependency-map { :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-         { :algorithm md5-algorithm :hash "bcaf5fa5b1a53a0a8cd378a35285f884" :group group :artifact artifact :version version }))
-  (is (= (create-dependency-map { :group group :artifact artifact :version version } [])
-         { :algorithm algorithm :hash "f25fcaa3afe2d96b7cf825dbf9ff6de4a8b514ec" :group group :artifact artifact :version version })))
+  (is (= (create-dependency-map { :group group :artifact artifact :version version :algorithm md5-algorithm })
+         { :algorithm md5-algorithm :hash "909890ce4bf388152925c0b401c9f730" :group group :artifact artifact :version version }))
+  (is (= (create-dependency-map { :group group :artifact artifact :version version })
+         { :algorithm algorithm :hash "c5aed5373965d1979dd249dd9f38d7bb5b2ee1c2" :group group :artifact artifact :version version })))
 
 (deftest test-create-bill-clj-map
-  (is (= (create-bill-clj-map { :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])
+  (is (= (create-bill-clj-map { :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies })
           { :group group :artifact artifact :version version :file { :name (str artifact "-" version ".jar") :algorithm md5-algorithm :hash md5-hash-code } :dependencies dependencies-vector })))
 
 (deftest test-update-repository
   (let [options { :group group  :artifact artifact :version version :algorithm algorithm }
         args []
-        dependency-map (create-dependency-map options args)
+        dependency-map (create-dependency-map options)
         hash-directory (repository/bill-hash-directory dependency-map)
         bill-jar-file (repository/bill-jar dependency-map)
         bill-clj-file (repository/bill-clj dependency-map)]
@@ -68,7 +68,7 @@
         (.delete bill-jar-file))
       (when (and hash-directory (.exists hash-directory))
         (.delete hash-directory))
-      (update-repository options args)
+      (update-repository options)
       (is (when hash-directory (.exists hash-directory)))
       (is (when bill-jar-file (.exists bill-jar-file)))
       (is (when bill-clj-file (.exists bill-clj-file)))

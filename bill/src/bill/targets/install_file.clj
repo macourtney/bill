@@ -136,7 +136,7 @@
     
 (defn print-results [dependency-map]
   (println "Installed:" (util/dependency-vector-str dependency-map)))
-
+  
 (defn update-repository [options args]
   (let [dependency-map (create-dependency-map options args)]
     (copy-bill-jar options args dependency-map)

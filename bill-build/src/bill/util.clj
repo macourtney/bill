@@ -4,6 +4,8 @@
   (:import [java.io ByteArrayOutputStream File OutputStreamWriter StringWriter]
            [java.security MessageDigest]))
 
+(def default-char-set "UTF-8")
+
 (def default-algorithm "SHA-1")
 (def user-directory (java-io/file (System/getProperty "user.home")))
 (def default-chunk-size 1024)
@@ -18,16 +20,14 @@
       (.close string-writer)
       (.toString string-writer))))
 
-(defn write-form [writer form]
-  (with-open [bill-clj-writer (java-io/writer writer)]
-    (binding [*out* bill-clj-writer]
-      (println (serialize-clj form)))))
-
 (defn form-bytes [form]
-  (with-open [byte-array-output-stream (new ByteArrayOutputStream)
-              stream-writer (OutputStreamWriter. byte-array-output-stream)]
-    (write-form stream-writer form)
-    (.toByteArray byte-array-output-stream)))
+  (when-let [form-str (serialize-clj form)]
+    (.getBytes form-str default-char-set)))
+
+(defn write-form [writer form]
+  (when-let [form-byte-array (form-bytes form)]
+    (with-open [bill-clj-output-stream (java-io/output-stream writer)]
+      (.write bill-clj-output-stream form-byte-array))))
 
 (defn read-byte-chunk
   ([input-stream] (read-byte-chunk input-stream default-chunk-size))
@@ -84,6 +84,29 @@
 
 (defn dependency-vector-str [dependency-map]
   (serialize-clj (dependency-vector dependency-map)))
+  
+(defn parse-hash-vector [hash-vector]
+  (cond
+    (second hash-vector) { :algorithm (first hash-vector) :hash (second hash-vector) }
+    (first hash-vector) { :algorithm default-algorithm :hash (first hash-vector) }))
+
+(defn parse-dependency-symbol [dependency-symbol]
+  (when dependency-symbol
+    (let [artifact (name dependency-symbol)]
+      { :group (or (namespace dependency-symbol) artifact)
+        :artifact artifact })))
+
+(defn dependency-map [dependency-vector]
+  (when dependency-vector
+    (if (or (vector? dependency-vector) (list? dependency-vector))
+      (let [first-item (first dependency-vector)]
+        (if (symbol? first-item)
+          (merge
+            (parse-dependency-symbol first-item)
+            { :version (second dependency-vector) }
+            (parse-hash-vector (drop 2 dependency-vector)))
+          (parse-hash-vector dependency-vector)))
+      dependency-vector)))
 
 (defn file-name [{ :keys [artifact version] :as dependency-map }]
   (when (and artifact version)

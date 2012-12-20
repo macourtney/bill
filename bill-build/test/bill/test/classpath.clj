@@ -9,30 +9,6 @@
             [clojure.string :as string]
             test-utils))
 
-(deftest test-parse-hash-vector
-  (is (= { :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
-         (parse-hash-vector [test-utils/clojure-algorithm test-utils/clojure-hash])))
-  (is (= { :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
-         (parse-hash-vector [test-utils/clojure-hash])))
-  (is (nil? (parse-hash-vector [])))
-  (is (nil? (parse-hash-vector nil))))
-
-(deftest test-parse-dependency-symbol
-  (is (= { :group test-utils/clojure-group :artifact test-utils/clojure-artifact }
-         (parse-dependency-symbol test-utils/clojure-name)))
-  (is (= { :group "clojure" :artifact test-utils/clojure-artifact }
-         (parse-dependency-symbol 'clojure)))
-  (is (nil? (parse-dependency-symbol nil))))
-  
-(deftest test-dependency-map
-  (is (= { :group test-utils/clojure-group :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
-         (dependency-map [test-utils/clojure-name test-utils/clojure-version test-utils/clojure-algorithm test-utils/clojure-hash])))
-  (is (= { :group "clojure" :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
-         (dependency-map ['clojure test-utils/clojure-version test-utils/clojure-algorithm test-utils/clojure-hash])))
-  (is (= { :group "clojure" :artifact test-utils/clojure-artifact :version test-utils/clojure-version }
-         (dependency-map ['clojure test-utils/clojure-version])))
-  (is (nil? (dependency-map nil))))
-
 (deftest test-move-to-repository
   (let [clojure-jar (maven-repository/maven-jar test-utils/clojure-dependency-map)
         bill-clojure-jar (repository/bill-jar test-utils/clojure-dependency-map)]

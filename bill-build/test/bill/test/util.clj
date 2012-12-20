@@ -63,7 +63,7 @@
   (is (nil? (encode-hex nil))))
 
 (deftest test-hash-code
-  (let [clojure-jar (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version]))]
+  (let [clojure-jar (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version]))]
     (is clojure-jar)
     (is (.exists clojure-jar))
     (is (= (hash-code clojure-jar test-utils/clojure-algorithm) test-utils/clojure-hash)))
@@ -73,15 +73,15 @@
     (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-hash))))
 
 (deftest test-form-hash-code
-  (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "07724ab3490d24cbed7554341c589a558c1b77b4"))
-  (is (= (form-hash-code nil test-utils/clojure-algorithm) "e958f32bf433420ca20f95e2070538739db2c116"))
+  (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "359ab170814755674b1c3ff700055948e674c496"))
+  (is (nil? (form-hash-code nil test-utils/clojure-algorithm)))
   (is (nil? (form-hash-code { :foo "bar" } nil)))
   (is (nil? (form-hash-code nil nil))))
 
 (deftest test-validate-hash
-  (is (validate-hash (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm test-utils/clojure-hash))
+  (is (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm test-utils/clojure-hash))
   (is (validate-hash (repository/bill-jar test-utils/bill-dependency-map) test-utils/bill-algorithm test-utils/bill-hash))
-  (is (not (validate-hash (maven-repository/maven-jar (classpath/dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm "fail"))))
+  (is (not (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm "fail"))))
 
 (deftest test-file-name
   (is (= (file-name { :artifact test-utils/clojure-artifact :version test-utils/clojure-version }) "clojure-1.4.0"))
@@ -90,3 +90,27 @@
   (is (nil? (file-name { :version (keyword test-utils/clojure-version) })))
   (is (nil? (file-name {})))
   (is (nil? (file-name nil))))
+
+(deftest test-parse-hash-vector
+  (is (= { :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
+         (parse-hash-vector [test-utils/clojure-algorithm test-utils/clojure-hash])))
+  (is (= { :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
+         (parse-hash-vector [test-utils/clojure-hash])))
+  (is (nil? (parse-hash-vector [])))
+  (is (nil? (parse-hash-vector nil))))
+
+(deftest test-parse-dependency-symbol
+  (is (= { :group test-utils/clojure-group :artifact test-utils/clojure-artifact }
+         (parse-dependency-symbol test-utils/clojure-name)))
+  (is (= { :group "clojure" :artifact test-utils/clojure-artifact }
+         (parse-dependency-symbol 'clojure)))
+  (is (nil? (parse-dependency-symbol nil))))
+
+(deftest test-dependency-map
+  (is (= { :group test-utils/clojure-group :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
+         (dependency-map [test-utils/clojure-name test-utils/clojure-version test-utils/clojure-algorithm test-utils/clojure-hash])))
+  (is (= { :group "clojure" :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }
+         (dependency-map ['clojure test-utils/clojure-version test-utils/clojure-algorithm test-utils/clojure-hash])))
+  (is (= { :group "clojure" :artifact test-utils/clojure-artifact :version test-utils/clojure-version }
+         (dependency-map ['clojure test-utils/clojure-version])))
+  (is (nil? (dependency-map nil))))

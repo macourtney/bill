@@ -7,29 +7,6 @@
   (:import [java.io PushbackReader]
            [java.security MessageDigest]))
 
-(defn parse-hash-vector [hash-vector]
-  (cond
-    (second hash-vector) { :algorithm (first hash-vector) :hash (second hash-vector) }
-    (first hash-vector) { :algorithm util/default-algorithm :hash (first hash-vector) }))
-
-(defn parse-dependency-symbol [dependency-symbol]
-  (when dependency-symbol
-    (let [artifact (name dependency-symbol)]
-      { :group (or (namespace dependency-symbol) artifact)
-        :artifact artifact })))
-
-(defn dependency-map [dependency-vector]
-  (when dependency-vector
-    (if (or (vector? dependency-vector) (list? dependency-vector))
-      (let [first-item (first dependency-vector)]
-        (if (symbol? first-item)
-          (merge
-            (parse-dependency-symbol first-item)
-            { :version (second dependency-vector) }
-            (parse-hash-vector (drop 2 dependency-vector)))
-          (parse-hash-vector dependency-vector)))
-      dependency-vector)))
-
 (defn assure-hash-directory [algorithm hash]
   (let [hash-directory (repository/bill-hash-directory { :algorithm algorithm :hash hash })]
     (when (not (.exists hash-directory))
@@ -48,7 +25,7 @@
     (:dependencies bill-clj-map)))
 
 (defn child-dependency-maps [parent-dependency-map]
-  (filter identity (map dependency-map (dependencies parent-dependency-map))))
+  (filter identity (map util/dependency-map (dependencies parent-dependency-map))))
 
 (defn group-artifact-str [dependency-map]
   (when dependency-map
@@ -58,7 +35,7 @@
 (defn create-classpath
   ([] (create-classpath
         { :classpath {} 
-          :dependencies (map dependency-map (build/dependencies)) }))
+          :dependencies (map util/dependency-map (build/dependencies)) }))
   ([classpath-map]
     (let [classpath-dependencies (:dependencies classpath-map)]
       (if-let [dependency-map (first classpath-dependencies)]
@@ -80,7 +57,7 @@
   ([dependencies]
     (map repository/bill-jar (vals (create-classpath
       { :classpath {} 
-        :dependencies (map dependency-map dependencies) } )))))
+        :dependencies (map util/dependency-map dependencies) } )))))
       
 (defn classpath [bill-dependencies]
   (resolve-dependencies (concat (build/dependencies) bill-dependencies)))
