@@ -66,11 +66,11 @@
   (let [clojure-jar (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version]))]
     (is clojure-jar)
     (is (.exists clojure-jar))
-    (is (= (hash-code clojure-jar test-utils/clojure-algorithm) test-utils/clojure-hash)))
+    (is (= (hash-code clojure-jar test-utils/clojure-algorithm) test-utils/clojure-jar-hash)))
   (let [bill-jar (repository/bill-jar test-utils/bill-dependency-map)]
     (is bill-jar)
     (is (.exists bill-jar))
-    (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-hash))))
+    (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-jar-hash))))
 
 (deftest test-form-hash-code
   (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "359ab170814755674b1c3ff700055948e674c496"))
@@ -79,9 +79,12 @@
   (is (nil? (form-hash-code nil nil))))
 
 (deftest test-validate-hash
-  (is (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm test-utils/clojure-hash))
-  (is (validate-hash (repository/bill-jar test-utils/bill-dependency-map) test-utils/bill-algorithm test-utils/bill-hash))
-  (is (not (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version])) test-utils/clojure-algorithm "fail"))))
+  (is (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version]))
+                     test-utils/clojure-algorithm test-utils/clojure-jar-hash))
+  (is (validate-hash (repository/bill-jar test-utils/bill-dependency-map)
+                     test-utils/bill-algorithm test-utils/bill-jar-hash))
+  (is (not (validate-hash (maven-repository/maven-jar (dependency-map [test-utils/clojure-name test-utils/clojure-version]))
+                          test-utils/clojure-algorithm "fail"))))
 
 (deftest test-file-name
   (is (= (file-name { :artifact test-utils/clojure-artifact :version test-utils/clojure-version }) "clojure-1.4.0"))

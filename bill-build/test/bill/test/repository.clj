@@ -8,14 +8,14 @@
             [clojure.java.io :as java-io]
             [clojure.string :as string]))
 
-(def clojure-hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9")
+(def clojure-hash "c5aed5373965d1979dd249dd9f38d7bb5b2ee1c2")
 (def clojure-algorithm "SHA-1")
 (def clojure-version "1.4.0")
 (def clojure-name 'org.clojure/clojure)
 (def clojure-artifact "clojure")
-            
+
 (def clojure-dependency [clojure-name clojure-version clojure-algorithm clojure-hash])
-            
+
 (def clojure-dependency-map (util/dependency-map clojure-dependency))
 (def fail-dependency-map { :artifact :fail :version :1.0.0 :algorithm "SHA-1" :hash :fail })
 
@@ -25,7 +25,9 @@
 
                        :file { :name "clojure-1.4.0.jar"
                                :algorithm "SHA-1"
-                               :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" } })
+                               :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+
+                       :dependencies [] })
 
 (def test-clj (java-io/file "test/clojure-1.4.0.clj"))
 

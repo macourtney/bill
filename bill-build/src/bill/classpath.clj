@@ -13,13 +13,6 @@
       (.mkdirs hash-directory))
     hash-directory))
 
-(defn move-to-repository
-  ([jar-file] (move-to-repository jar-file util/default-algorithm))
-  ([jar-file algorithm]
-    (let [file-hash (util/hash-code jar-file algorithm)
-          hash-directory (assure-hash-directory algorithm file-hash)]
-      (java-io/copy jar-file (java-io/file hash-directory (.getName jar-file))))))
-
 (defn dependencies [dependency-map]
   (when-let [bill-clj-map (repository/read-bill-clj dependency-map)]
     (:dependencies bill-clj-map)))
@@ -51,13 +44,13 @@
                                        child-dependencies)
                                      next-dependencies) })))
         (:classpath classpath-map)))))
-      
+
 (defn resolve-dependencies
   ([] (resolve-dependencies (build/dependencies)))
   ([dependencies]
     (map repository/bill-jar (vals (create-classpath
       { :classpath {} 
         :dependencies (map util/dependency-map dependencies) } )))))
-      
+
 (defn classpath [bill-dependencies]
   (resolve-dependencies (concat (build/dependencies) bill-dependencies)))

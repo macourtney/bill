@@ -9,14 +9,6 @@
             [clojure.string :as string]
             test-utils))
 
-(deftest test-move-to-repository
-  (let [clojure-jar (maven-repository/maven-jar test-utils/clojure-dependency-map)
-        bill-clojure-jar (repository/bill-jar test-utils/clojure-dependency-map)]
-    (when (.exists bill-clojure-jar)
-      (.delete bill-clojure-jar))
-    (move-to-repository clojure-jar test-utils/clojure-algorithm)
-    (is (.exists bill-clojure-jar))))
-
 (deftest test-dependencies
   (is (= (dependencies test-utils/clojure-dependency-map) nil))
   (is (nil? (dependencies test-utils/fail-dependency-map))))

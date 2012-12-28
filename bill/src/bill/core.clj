@@ -7,11 +7,11 @@
 
 (def classloader-atom (atom nil))
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "44e2f4da7bedd23c1d33c4e4c64f4113f0ed7d66"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "034594aa71e18bdcc4c5ee088c7ec60f410cf453"])
 
 (defn classloader []
   @classloader-atom)
-  
+
 (defn classloader! [classloader]
   (reset! classloader-atom classloader))
 

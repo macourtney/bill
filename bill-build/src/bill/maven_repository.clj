@@ -14,22 +14,22 @@
 (defn maven-group-directory [{ :keys [group] }]
   (when group
     (reduce java-io/file maven-repository-directory (string/split (name group) #"\."))))
-  
+
 (defn maven-artifact-directory [{ :keys [artifact] :as dependency-map }]
   (when artifact
     (when-let [group-directory (maven-group-directory dependency-map)]
       (java-io/file group-directory (name artifact)))))
-  
+
 (defn maven-version-directory [{ :keys [version] :as dependency-map }]
   (when version
     (when-let [artifact-directory (maven-artifact-directory dependency-map)]
       (java-io/file artifact-directory (name version)))))
-      
+
 (defn maven-jar [{ :keys [artifact version] :as dependency-map }]
   (when (and artifact version)
     (when-let [version-directory (maven-version-directory dependency-map)]
       (java-io/file version-directory (str (util/file-name dependency-map) ".jar")))))
-      
+
 (defn maven-jar? [dependency-map]
   (when-let [maven-jar-file (maven-jar dependency-map)]
     (.exists maven-jar-file)))
@@ -38,7 +38,7 @@
   (when (and artifact version)
     (when-let [version-directory (maven-version-directory dependency-map)]
       (java-io/file version-directory (str (util/file-name dependency-map) ".pom")))))
-      
+
 (defn maven-pom? [dependency-map]
   (when-let [maven-pom-file (maven-pom dependency-map)]
     (.exists maven-pom-file)))
@@ -48,6 +48,9 @@
 
 (defn pom-group [pom-element]
   (first (xml/text (xml/find-child pom-element :groupId))))
+
+(defn pom-parent-group [pom-element]
+  (pom-group (xml/find-child pom-element :parent)))
 
 (defn pom-artifact [pom-element]
   (first (xml/text (xml/find-child pom-element :artifactId))))
@@ -79,7 +82,7 @@
     (let [artifact (pom-artifact pom-element)
           version (pom-version pom-element)
           algorithm (or (:algorithm dependency-map) util/default-algorithm)
-          bill-clj-map (add-jar { :group (pom-group pom-element)
+          bill-clj-map (add-jar { :group (or (pom-group pom-element) (pom-parent-group pom-element))
                                   :artifact artifact
                                   :version version }
                                 algorithm)]

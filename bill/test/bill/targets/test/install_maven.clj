@@ -71,8 +71,4 @@
       (update-repository options)
       (is (when hash-directory (.exists hash-directory)))
       (is (when bill-jar-file (.exists bill-jar-file)))
-      (is (when bill-clj-file (.exists bill-clj-file)))
-      (finally
-        (when bill-clj-file (.delete bill-clj-file))
-        (when bill-jar-file (.delete bill-jar-file))
-        (when hash-directory (.delete hash-directory))))))
+      (is (when bill-clj-file (.exists bill-clj-file))))))
