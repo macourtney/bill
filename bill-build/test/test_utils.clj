@@ -1,4 +1,5 @@
-(ns test-utils)
+(ns test-utils
+  (:refer-clojure :exclude [clojure-version]))
 
 (def bill-hash "e8f20161e67e2bf8d0c1c093a83dce07fd1e3c64")
 (def bill-algorithm "SHA-1")
