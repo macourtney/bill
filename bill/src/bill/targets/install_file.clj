@@ -1,5 +1,5 @@
 (ns bill.targets.install-file
-  (:use bill.target)
+  (:use bill.task)
   (:require [bill.classpath :as classpath]
             [bill.repository :as repository]
             [bill.util :as util]
@@ -143,7 +143,7 @@
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
   
-(deftarget install-file [& args]
+(deftask install-file [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options args)
       (update-repository options args)

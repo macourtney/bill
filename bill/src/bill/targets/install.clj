@@ -1,7 +1,6 @@
 (ns bill.targets.install
-  (:use bill.target)
+  (:use bill.task)
   (:require [bill.build :as build]
-            [bill.classpath :as classpath]
             [bill.repository :as repository]
             [bill.util :as util]
             [clojure.java.io :as java-io]))
@@ -41,7 +40,7 @@
     (java-io/copy target-bill-clj (repository/bill-clj dependency-map))
     (println "Installed:" (util/serialize-clj (repository/target-bill-clj-dependency-vector clj-map)))))
 
-(deftarget install [& args]
+(deftask install [& args]
   (if-let [jar-file (find-jar-file)]
     (install-jar jar-file)
     (println "The jar file could not be found. Nothing installed.")))

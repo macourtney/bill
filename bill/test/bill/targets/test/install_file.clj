@@ -1,10 +1,7 @@
 (ns bill.targets.test.install-file
   (:use clojure.test
         bill.targets.install-file)
-  (:require [bill.build :as build]
-            [bill.classpath :as classpath]
-            [bill.repository :as repository]
-            [bill.target :as target]
+  (:require [bill.repository :as repository]
             [bill.util :as util]))
 
 (def new-line (System/getProperty "line.separator"))

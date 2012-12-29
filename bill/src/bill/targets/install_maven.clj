@@ -1,5 +1,5 @@
 (ns bill.targets.install-maven
-  (:use bill.target)
+  (:use bill.task)
   (:require [bill.maven-repository :as maven-repository]
             [bill.repository :as repository]
             [bill.util :as util]
@@ -111,7 +111,7 @@
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
 
-(deftarget install-maven [& args]
+(deftask install-maven [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options)
       (update-repository options)

@@ -3,7 +3,7 @@
         bill.core)
   (:require [bill.build :as build]
             [bill.repository :as repository]
-            [bill.target :as target]
+            [bill.task :as task]
             [bill.util :as util]))
 
 (def project-name 'org.bill/bill)
@@ -13,7 +13,7 @@
 (deftest test-defbuild
   (is (repository/bill-jar? (util/dependency-map bill-dependency)))
   (let [old-build (build/build)]
-    (is (not (target/find-target :build-test)))
+    (is (not (task/find-task :build-test)))
 
     (defbuild
       { :project [org.bill/bill "0.0.1-SNAPSHOT"]
@@ -24,7 +24,7 @@
 
       (is (build/build))
 
-      (deftarget args-test
+      (deftask args-test
         "Tests the given arguments against [\"Args\" \"test.\"]."
         [& args]
         (is (= args ["Args" "test."])))
@@ -32,7 +32,7 @@
       (build-environment
         (use 'clojure.test)
 
-        (deftarget build-test
+        (deftask build-test
           "Tests the given arguments against [\"Args\" \"test.\"]."
           [& args]
           (is (= args ["Args" "test."])))))
@@ -40,7 +40,7 @@
     (is (= (merge build/build-defaults { :description description :project ['org.bill/bill project-version] })
            (build/build)))
     (is (classloader))
-    (run-target-in-classloader :args-test ["Args" "test."])
-    (is (target/find-target :build-test))
+    (run-task-in-classloader :args-test ["Args" "test."])
+    (is (task/find-task :build-test))
     (classloader! nil)
     (build/build! old-build)))

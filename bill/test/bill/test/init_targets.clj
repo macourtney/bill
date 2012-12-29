@@ -1,10 +1,10 @@
 (ns bill.test.init-targets
   (:use clojure.test
         bill.init-targets)
-  (:require [bill.target :as target]))
+  (:require [bill.task :as task]))
 
-(def targets [:deps :install :install-file :install-maven])
+(def tasks [:deps :install :install-file :install-maven])
 
 (deftest test-init
-  (doseq [target-name targets]
-    (is (target/find-target target-name))))
+  (doseq [task-name tasks]
+    (is (task/find-task task-name))))

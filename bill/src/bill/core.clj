@@ -7,7 +7,7 @@
 
 (def classloader-atom (atom nil))
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "0b5a239305a30a00aca00260ba486af29228c804"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "37e546b878b91eaf86e8e89e702f7c03208acc86"])
 
 (defn classloader []
   @classloader-atom)
@@ -18,15 +18,15 @@
 (defn create-classloader []
   (apply classlojure/classlojure (classpath/classpath [bill-dependency])))
   
-(defn run-target-in-classloader [target args]
-  (classlojure/eval-in (classloader) `(~'run-target ~target ~args)))
+(defn run-task-in-classloader [task args]
+  (classlojure/eval-in (classloader) `(~'run-task ~task ~args)))
 
 (defn initialize-environments [build-map]
   (classlojure/eval-in (classloader) `(do
-                                        (use 'bill.target)
+                                        (use 'bill.task)
                                         (require 'bill.build)
                                         (bill.build/update-build! '~build-map)))
-  (build-environment/eval-in-build ['(use 'bill.target)]))
+  (build-environment/eval-in-build ['(use 'bill.task)]))
 
 (defn eval-forms [forms]
   (doseq [form forms]

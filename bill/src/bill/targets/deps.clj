@@ -1,5 +1,5 @@
 (ns bill.targets.deps
-  (:use bill.target)
+  (:use bill.task)
   (:require [bill.build :as build]
             [bill.targets.install-maven :as install-maven]
             [bill.util :as util]))
@@ -10,7 +10,7 @@
 (defn install-dependencies [dependencies]
   (reduce install-dependency false dependencies))
 
-(deftarget deps [& args]
+(deftask deps [& args]
   (if-let [dependencies (build/dependencies)]
     (when-not (install-dependencies dependencies)
       (println "All dependencies already installed."))
