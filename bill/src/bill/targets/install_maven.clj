@@ -91,25 +91,26 @@
   (println "Installed:" (util/dependency-vector-str dependency-map)))
 
 (declare update-repository)
-  
+
 (defn install-dependency [dependency-map]
   (when-not (repository/bill-clj? dependency-map)
     (update-repository dependency-map)
-    (when-not (repository/bill-clj? dependency-map)
-      (println "Could not install:" (util/dependency-vector-str dependency-map)))))
-  
+    (if-not (repository/bill-clj? dependency-map)
+      (println "Could not install:" (util/dependency-vector-str dependency-map))
+      true)))
+
 (defn install-dependencies [dependency-map]
   (let [bill-clj (create-bill-clj-map dependency-map)]
     (doseq [dependency-dependency-map (map util/dependency-map (:dependencies bill-clj))]
       (install-dependency dependency-dependency-map))))
-  
+
 (defn update-repository [options]
   (let [dependency-map (create-dependency-map options)]
     (install-dependencies dependency-map)
     (copy-bill-jar options dependency-map)
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
-  
+
 (deftarget install-maven [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options)

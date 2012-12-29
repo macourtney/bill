@@ -4,18 +4,18 @@
                   
 (defn targets []
   @target-atom)
-  
+
 (defn targets! [targets-map]
   (reset! target-atom targets-map))
 
 (defn find-target [target-name]
   (get (targets) (name target-name)))
-  
+
 (defn run-target [target args]
   (when-let [target (if (map? target) target (find-target target))]
     (let [parent-map (:parent target)]
       (apply (:function target) parent-map args))))
-    
+
 (defn add-target [target-map]
   (let [target-name (:name target-map)
         parent-target (find-target target-name)
