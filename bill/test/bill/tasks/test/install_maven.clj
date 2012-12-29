@@ -1,6 +1,6 @@
-(ns bill.targets.test.install-maven
+(ns bill.tasks.test.install-maven
   (:use clojure.test
-        bill.targets.install-maven)
+        bill.tasks.install-maven)
   (:require [bill.repository :as repository]
             [bill.util :as util]))
 

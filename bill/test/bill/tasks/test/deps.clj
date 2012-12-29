@@ -1,6 +1,6 @@
-(ns bill.targets.test.deps
+(ns bill.tasks.test.deps
   (:use clojure.test
-        bill.targets.deps)
+        bill.tasks.deps)
   (:require [bill.task :as task]))
 
 (deftest test-init

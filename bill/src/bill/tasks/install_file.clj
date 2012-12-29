@@ -1,4 +1,4 @@
-(ns bill.targets.install-file
+(ns bill.tasks.install-file
   (:use bill.task)
   (:require [bill.classpath :as classpath]
             [bill.repository :as repository]

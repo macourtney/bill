@@ -1,6 +1,6 @@
-(ns bill.test.init-targets
+(ns bill.test.init-tasks
   (:use clojure.test
-        bill.init-targets)
+        bill.init-tasks)
   (:require [bill.task :as task]))
 
 (def tasks [:deps :install :install-file :install-maven])

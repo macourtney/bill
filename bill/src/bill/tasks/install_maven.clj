@@ -1,4 +1,4 @@
-(ns bill.targets.install-maven
+(ns bill.tasks.install-maven
   (:use bill.task)
   (:require [bill.maven-repository :as maven-repository]
             [bill.repository :as repository]

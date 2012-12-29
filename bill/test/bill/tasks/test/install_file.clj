@@ -1,6 +1,6 @@
-(ns bill.targets.test.install-file
+(ns bill.tasks.test.install-file
   (:use clojure.test
-        bill.targets.install-file)
+        bill.tasks.install-file)
   (:require [bill.repository :as repository]
             [bill.util :as util]))
 

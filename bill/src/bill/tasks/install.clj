@@ -1,4 +1,4 @@
-(ns bill.targets.install
+(ns bill.tasks.install
   (:use bill.task)
   (:require [bill.build :as build]
             [bill.repository :as repository]

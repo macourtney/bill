@@ -1,7 +1,7 @@
-(ns bill.targets.deps
+(ns bill.tasks.deps
   (:use bill.task)
   (:require [bill.build :as build]
-            [bill.targets.install-maven :as install-maven]
+            [bill.tasks.install-maven :as install-maven]
             [bill.util :as util]))
 
 (defn install-dependency [installed? dependency]
