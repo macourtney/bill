@@ -1,4 +1,5 @@
-(ns bill.task)
+(ns bill.task
+  (:import [org.bill TaskFailException]))
 
 (def task-atom (atom {}))
                   
@@ -32,3 +33,6 @@
       { :name ~task-name-str
         :description ~description
         :function (fn ~task-name-symbol ~arg-vec ~@body) })))
+
+(defn fail [message]
+  (throw (TaskFailException. message)))

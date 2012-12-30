@@ -71,7 +71,7 @@
   (when-let [clj-file (find-clj-file options)]
     (when (.exists clj-file)
       (read (PushbackReader. (java-io/reader clj-file))))))
-    
+
 (defn validate-clj [options]
   (when-let [clj-file (find-clj options)]
     (when (not-empty clj-file)
@@ -130,19 +130,21 @@
 
 (defn copy-bill-jar [options args dependency-map]
   (let [file (create-file options args)]
+    (when-not (.exists file)
+      (fail (str "File does not exist: " (.getPath file))))
     (when-let [bill-jar (repository/bill-jar dependency-map)]
       (.mkdirs (.getParentFile bill-jar))
       (java-io/copy file bill-jar))))
-    
+
 (defn print-results [dependency-map]
   (println "Installed:" (util/dependency-vector-str dependency-map)))
-  
+
 (defn update-repository [options args]
   (let [dependency-map (create-dependency-map options args)]
     (copy-bill-jar options args dependency-map)
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
-  
+
 (deftask install-file [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options args)

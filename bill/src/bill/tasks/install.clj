@@ -30,7 +30,9 @@
 (defn create-repository-jar [dependency-map]
   (let [repository-bill-jar (repository/bill-jar dependency-map)]
     (.mkdirs (.getParentFile repository-bill-jar))
-    (java-io/copy (find-jar-file) repository-bill-jar)))
+    (if-let [target-jar (find-jar-file)]
+      (java-io/copy target-jar repository-bill-jar)
+      (fail (str "Could not find file: " (.getPath (build/target-jar-file)))))))
 
 (defn install-jar [jar-file]
   (let [clj-map (bill-clj-map)

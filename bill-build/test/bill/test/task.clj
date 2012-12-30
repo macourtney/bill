@@ -1,6 +1,7 @@
 (ns bill.test.task
   (:use clojure.test
-        bill.task))
+        bill.task)
+  (:import [org.bill TaskFailException]))
 
 (deftest test-tasks
   (is (= (tasks) {}))
@@ -43,3 +44,13 @@
       (run-task test-task-name test-args))
     (tasks! {})
     (is (= (tasks) {}))))
+
+(deftest test-fail
+  (let [message "Totally valid failure."]
+    (try
+      (fail message)
+      (is false "An TaskFailException was expected.")
+      (catch TaskFailException task-fail-exception
+        (is task-fail-exception)
+        (is (= (.getMessage task-fail-exception) message))
+        (is (nil? (.getCause task-fail-exception)))))))

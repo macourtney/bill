@@ -1,5 +1,6 @@
 (ns bill.init-tasks
-  (:require bill.tasks.deps
+  (:require bill.tasks.clean
+            bill.tasks.deps
             bill.tasks.install
             bill.tasks.install-file
             bill.tasks.install-maven))

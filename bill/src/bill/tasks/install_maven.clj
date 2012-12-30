@@ -83,6 +83,8 @@
 
 (defn copy-bill-jar [options dependency-map]
   (when-let [file (maven-repository/maven-jar dependency-map)]
+    (when-not (.exists file)
+      (fail (str "File does not exist: " (.getPath file))))
     (when-let [bill-jar (repository/bill-jar dependency-map)]
       (.mkdirs (.getParentFile bill-jar))
       (java-io/copy file bill-jar))))
