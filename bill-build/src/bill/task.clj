@@ -23,6 +23,9 @@
         task-map (assoc task-map :parent parent-task)]
     (swap! task-atom #(assoc %1 (name %2) %3) task-name task-map)))
 
+(defn remove-task [task-name]
+  (swap! task-atom #(dissoc %1 (name %2)) task-name))
+
 (defmacro deftask [task-name arg-vec & body]
   (let [task-name-str (name task-name)
         task-name-symbol (symbol task-name-str)

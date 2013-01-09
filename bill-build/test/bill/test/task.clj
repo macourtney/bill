@@ -20,6 +20,8 @@
     (add-task test-task-map)
     (is (= (find-task test-task-name) test-task-map))
     (is (= (find-task (name test-task-name)) test-task-map))
+    (remove-task test-task-name)
+    (is (nil? (find-task test-task-name)))
     (tasks! {})
     (is (= (tasks) {}))))
 
