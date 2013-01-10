@@ -32,7 +32,8 @@
   (let [old-build (build/build)]
     (build/build!
       { :dependencies [test-utils/clojure-dependency] })
-    (is (= (classpath [test-utils/bill-dependency]) [(repository/bill-jar test-utils/bill-dependency-map) (repository/bill-jar test-utils/clojure-dependency-map)]))
+    (is (= (classpath [test-utils/bill-dependency]) 
+           [(repository/bill-jar test-utils/bill-dependency-map) (repository/bill-jar test-utils/clojure-dependency-map)]))
     (build/build!
       { :dependencies [test-utils/bill-dependency] })
     (is (= (classpath []) [(repository/bill-jar test-utils/clojure-dependency-map) (repository/bill-jar test-utils/bill-dependency-map)]))

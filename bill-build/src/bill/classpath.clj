@@ -54,3 +54,11 @@
 
 (defn classpath [bill-dependencies]
   (resolve-dependencies (concat (build/dependencies) bill-dependencies)))
+
+(defn build-environment-classpath [bill-dependencies]
+  (concat
+    (classpath bill-dependencies) 
+    (build/source-path-files)
+    (when-let [compile-path-file (build/compile-path-file)] [compile-path-file])
+    (build/test-path-files)
+    (build/resource-path-files)))

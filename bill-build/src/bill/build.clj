@@ -17,10 +17,10 @@
   })
 
 (def build-atom (atom build-defaults))
-                  
+
 (defn build []
   @build-atom)
-  
+
 (defn build! [build-map]
   (reset! build-atom build-map))
 
@@ -35,6 +35,30 @@
 
 (defn target-path []
   (:target-path (build)))
+
+(defn source-paths []
+  (:source-paths (build)))
+
+(defn source-path-files []
+  (map java-io/file (source-paths)))
+
+(defn compile-path []
+  (:compile-path (build)))
+
+(defn compile-path-file []
+  (java-io/file (compile-path)))
+
+(defn test-paths []
+  (:test-paths (build)))
+
+(defn test-path-files []
+  (map java-io/file (test-paths)))
+
+(defn resource-paths []
+  (:resource-paths (build)))
+
+(defn resource-path-files []
+  (map java-io/file (resource-paths)))
 
 (defn artifact-id []
   (when-let [group-artifact (first (project))]
