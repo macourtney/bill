@@ -23,18 +23,25 @@
          { (str test-utils/clojure-name) test-utils/clojure-dependency-map })))
 
 (deftest test-dependencies
-  (is (= (dependencies test-utils/bill-dependency-map) [test-utils/clojure-dependency])))
+  (is (= (dependencies test-utils/bill-dependency-map)
+         [test-utils/clojure-dependency test-utils/tools-namespace-dependency])))
 
 (deftest test-child-dependency-maps
-  (is (= (child-dependency-maps test-utils/bill-dependency-map) [test-utils/clojure-dependency-map])))
+  (is (= (child-dependency-maps test-utils/bill-dependency-map)
+         [test-utils/clojure-dependency-map test-utils/tools-namespace-dependency-map])))
 
 (deftest test-classpath
   (let [old-build (build/build)]
     (build/build!
       { :dependencies [test-utils/clojure-dependency] })
     (is (= (classpath [test-utils/bill-dependency]) 
-           [(repository/bill-jar test-utils/bill-dependency-map) (repository/bill-jar test-utils/clojure-dependency-map)]))
+           [(repository/bill-jar test-utils/tools-namespace-dependency-map)
+            (repository/bill-jar test-utils/bill-dependency-map)
+            (repository/bill-jar test-utils/clojure-dependency-map)]))
     (build/build!
       { :dependencies [test-utils/bill-dependency] })
-    (is (= (classpath []) [(repository/bill-jar test-utils/clojure-dependency-map) (repository/bill-jar test-utils/bill-dependency-map)]))
+    (is (= (classpath [])
+           [(repository/bill-jar test-utils/tools-namespace-dependency-map)
+           (repository/bill-jar test-utils/clojure-dependency-map)
+            (repository/bill-jar test-utils/bill-dependency-map)]))
     (build/build! old-build)))

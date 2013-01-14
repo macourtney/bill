@@ -2,19 +2,21 @@
   (:use clojure.test
         bill.tasks.install-file)
   (:require [bill.repository :as repository]
-            [bill.util :as util]))
+            [bill.util :as util]
+            [clojure.java.io :as java-io]))
 
 (def new-line (System/getProperty "line.separator"))
 
 (def test-jar-path "test-resources/test-1.0.0.jar")
+(def test-jar-file (java-io/file test-jar-path))
 (def usage (str "Usage:" new-line new-line " Switches            Default  Desc                          " new-line " --------            -------  ----                          " new-line " -f, --file                   The file to load              " new-line " -g, --group                  The group id.                 " new-line " -a, --artifact               The artifact id.              " new-line " -v, --version                The version.                  " new-line " -l, --algorithm     SHA-1    The hash algorithm to use.    " new-line " -d, --dependencies           The dependency vector to use. " new-line " -c, --clj                    The clj file to use.          " new-line))
 (def algorithm "SHA-1")
 (def md5-algorithm "MD5")
 (def group "org.test")
 (def artifact "test")
 (def version "1.0.0")
-(def hash-code "f588b53a5f837f13f1771c7552683db72140eddb")
-(def md5-hash-code "06e3b86e780123e00808f8987011df98")
+(def hash-code (util/hash-code test-jar-file algorithm))
+(def md5-hash-code (util/hash-code test-jar-file md5-algorithm))
 (def dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]])
 (def dependencies (util/serialize-clj dependencies-vector))
 (def test-clj "test-resources/test-1.0.0.clj")
@@ -56,9 +58,9 @@
 
 (deftest test-create-dependency-map
   (is (= (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-          { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "e18961afb33e382f11f08001520a1a03" }))
+         { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "49ca74c5dfb913d5ce5be4930418950d" }))
   (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
-          { :group artifact :artifact artifact :version version :algorithm algorithm :hash "73db1d1e2d4bb2781106b4148bc7c5857de868a5" })))
+         { :group artifact :artifact artifact :version version :algorithm algorithm :hash "a9b1f3fdb2b49ac4a767203f245772f693198a25" })))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])
