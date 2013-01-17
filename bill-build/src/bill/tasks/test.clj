@@ -2,20 +2,27 @@
   (:use bill.task)
   (:require [bill.build :as build]
             [clojure.test :as test]
+            [clojure.tools.namespace.file :as namespace-file]
             [clojure.tools.namespace.find :as namespace-find]))
 
-(defn all-test-namespaces []
-  (sort (mapcat namespace-find/find-namespaces-in-dir (build/test-path-files))))
+(defn test-files [dir]
+  (namespace-find/find-clojure-sources-in-dir dir))
+            
+(defn all-test-files []
+  (sort (mapcat test-files (build/test-path-files))))
+  
+(defn file-namespaces [args files]
+  (or (seq (map symbol args)) (map second (keep namespace-file/read-file-ns-decl files))))
 
-(defn parse-namespaces [args]
-  (or (map symbol args) (all-test-namespaces)))
-
-(defn load-namespaces [namespaces]
-  (apply require :reload namespaces))
+(defn load-files [test-files]
+  (doseq [test-file test-files]
+    (load-file (.getAbsolutePath test-file))))
 
 (deftask test [& args]
-  (let [namespaces (parse-namespaces args)]
+  (let [test-files (all-test-files)
+        namespaces (file-namespaces args test-files)]
     (println "Running tests:" namespaces)
-    (load-namespaces namespaces)
+    (load-files test-files)
     (let [test-results (apply test/run-tests namespaces)]
-      (println "test-results:" test-results))))
+      (when (> (+ (:error test-results) (:fail test-results)) 0)
+        (fail "You have test failures!")))))

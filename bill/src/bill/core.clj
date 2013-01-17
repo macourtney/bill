@@ -7,7 +7,7 @@
 
 (def classloader-atom (atom nil))
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "c00cb8a17eae801a7125e59caab4ce71432f086a"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "8d16b300bd76e214224c6ec2915da652f11810b7"])
 
 (defn classloader []
   @classloader-atom)
@@ -17,7 +17,6 @@
 
 (defn create-classloader []
   (let [classpath (classpath/build-environment-classpath [bill-dependency])]
-    (println "classpath:" classpath)
     (apply classlojure/classlojure classpath)))
 
 (defn run-task-in-classloader [task args]
