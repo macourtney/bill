@@ -2,6 +2,7 @@
   (:use clojure.test
         bill.core)
   (:require [bill.build :as build]
+            [bill.classloader :as classloader]
             [bill.repository :as repository]
             [bill.task :as task]
             [bill.util :as util]))
@@ -39,8 +40,8 @@
 
     (is (= (merge build/build-defaults { :description description :project ['org.bill/bill project-version] })
            (build/build)))
-    (is (classloader))
-    (run-task-in-classloader :args-test ["Args" "test."])
+    (is (classloader/classloader))
+    (classloader/run-task-in-classloader :args-test ["Args" "test."])
     (is (task/find-task :build-test))
-    (classloader! nil)
+    (classloader/classloader! nil)
     (build/build! old-build)))

@@ -8,6 +8,15 @@
 
 (defn tasks! [tasks-map]
   (reset! task-atom tasks-map))
+  
+(defn task-name [task]
+  (:name task))
+  
+(defn task-function [task]
+  (:function task))
+  
+(defn task-description [task]
+  (:description task))
 
 (defn find-task [task-name]
   (get (tasks) (name task-name)))
@@ -15,7 +24,7 @@
 (defn run-task [task args]
   (when-let [task (if (map? task) task (find-task task))]
     (let [parent-map (:parent task)]
-      (apply (:function task) parent-map args))))
+      (apply (task-function task) parent-map args))))
 
 (defn add-task [task-map]
   (let [task-name (:name task-map)
@@ -25,7 +34,7 @@
 
 (defn remove-task [task-name]
   (swap! task-atom #(dissoc %1 (name %2)) task-name))
-
+  
 (defmacro deftask [task-name arg-vec & body]
   (let [task-name-str (name task-name)
         task-name-symbol (symbol task-name-str)

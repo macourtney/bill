@@ -1,5 +1,5 @@
 (ns bill.main
-  (:require [bill.core :as core]
+  (:require [bill.classloader :as classloader]
             [bill.task :as task])
   (:import [org.bill TaskFailException]))
 
@@ -7,7 +7,7 @@
   (let [task (or (first args) "help")]
     (if (task/find-task task)
       (task/run-task task (rest args))
-      (core/run-task-in-classloader task (rest args)))))
+      (classloader/run-task-in-classloader task (rest args)))))
 
 (defn -main [& args]
   (try
