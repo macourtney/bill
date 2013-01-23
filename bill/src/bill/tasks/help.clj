@@ -1,7 +1,8 @@
 (ns bill.tasks.help
   (:use bill.task)
   (:require [bill.build :as build]
-            [bill.classloader :as classloader])
+            [bill.classloader :as classloader]
+            [clojure.string :as string])
   (:import [java.io File]
            [java.util Comparator]))
 
@@ -19,15 +20,22 @@
 (defn collect-tasks []
   (sort-tasks (vals (tasks))))
 
+(defn create-spaces [task-name]
+  (let [number-of-spaces (- 16 (count task-name))]
+    (if (pos? number-of-spaces)
+      (string/join "" (repeat number-of-spaces " "))
+      "")))
+  
 (defn print-task [task]
-  (println (task-name task) "\t\t" (task-description task)))
+  (let [task-name (task-name task)]
+    (println task-name (create-spaces task-name) (task-description task))))
 
 (defn print-tasks [tasks]
   (doseq [task tasks]
     (print-task task)))
 
 (deftask help
-  "Displays a list of all of the tasks."
+  "Display a list of tasks."
   [& args]
   (let [tasks (collect-tasks)]
     (println "Bill is a tool for building Clojure projects.")

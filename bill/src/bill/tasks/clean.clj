@@ -15,7 +15,9 @@
       (recursive-delete child-path)))
   (delete path))
 
-(deftask clean [& args]
+(deftask clean
+  "Delete all files from project's target-path."
+  [& args]
   (if-let [target-path (build/target-path)]
     (when-let [target-file (java-io/file target-path)]
       (when (.exists target-file)

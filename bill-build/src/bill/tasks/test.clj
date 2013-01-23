@@ -18,7 +18,9 @@
   (doseq [test-file test-files]
     (load-file (.getAbsolutePath test-file))))
 
-(deftask test [& args]
+(deftask test
+  "Run the project's tests."
+  [& args]
   (let [test-files (all-test-files)
         namespaces (file-namespaces args test-files)]
     (println "Running tests:" namespaces)

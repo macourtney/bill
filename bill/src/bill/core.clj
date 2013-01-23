@@ -5,7 +5,7 @@
             [bill.classpath :as classpath]
             [bill.init-tasks :as init-tasks])) ; Loads default tasks.
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "a3c30cec30f8e2841629bc4c708cdb06ac58f600"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "acc28a977cb33456753b9fc81fda6477824366a5"])
 
 (defn project-init-form [build-map]
   `(do

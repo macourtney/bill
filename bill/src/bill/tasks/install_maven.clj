@@ -113,7 +113,9 @@
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
 
-(deftask install-maven [& args]
+(deftask install-maven
+  "Install a specific file from the maven repository into the bill repository."
+  [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options)
       (update-repository options)

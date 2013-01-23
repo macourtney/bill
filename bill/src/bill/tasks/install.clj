@@ -42,7 +42,9 @@
     (java-io/copy target-bill-clj (repository/bill-clj dependency-map))
     (println "Installed:" (util/serialize-clj (repository/target-bill-clj-dependency-vector clj-map)))))
 
-(deftask install [& args]
+(deftask install
+  "Install current project to the local repository."
+  [& args]
   (if-let [jar-file (find-jar-file)]
     (install-jar jar-file)
     (println "The jar file could not be found. Nothing installed.")))

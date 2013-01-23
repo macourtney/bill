@@ -10,7 +10,9 @@
 (defn install-dependencies [dependencies]
   (reduce install-dependency false dependencies))
 
-(deftask deps [& args]
+(deftask deps
+  "Ensure all dependencies are loaded into the repository."
+  [& args]
   (if-let [dependencies (build/dependencies)]
     (when-not (install-dependencies dependencies)
       (println "All dependencies already installed."))

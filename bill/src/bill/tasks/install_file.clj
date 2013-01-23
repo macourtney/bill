@@ -145,7 +145,9 @@
     (write-bill-clj dependency-map)
     (print-results dependency-map)))
 
-(deftask install-file [& args]
+(deftask install-file
+  "Install a specific file into the repository."
+  [& args]
   (let [[options args banner] (parse-args args)]
     (if (validate-args options args)
       (update-repository options args)
