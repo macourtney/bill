@@ -22,4 +22,4 @@
     (when-let [target-file (java-io/file target-path)]
       (when (.exists target-file)
         (recursive-delete target-file)))
-    (println "No dependencies found.")))
+    (println "No target directory found.")))

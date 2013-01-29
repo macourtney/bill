@@ -14,6 +14,11 @@
     :resource-paths ["resources"] ; non-code files included in classpath/jar
     :compile-path "target/classes" ; for .class files
     :target-path "target/" ; where to place the project's jar file
+    
+    :source-extensions ["clj"]
+    :compiled-extensions ["class"]
+    
+    :manifest {} ; The attributes of the manifest file.
   })
 
 (def build-atom (atom build-defaults))
@@ -26,6 +31,9 @@
 
 (defn update-build! [build-map]
   (build! (merge (build) build-map)))
+
+(defn build-file []
+  (java-io/file "build.clj"))
 
 (defn project []
   (:project (build)))
@@ -98,3 +106,25 @@
   (when-let [target (target-path)]
     (when-let [jar (uberjar-name)]
       (java-io/file target jar))))
+
+(defn main []
+  (:main (build)))
+
+(defn main-class-name []
+  (when-let [main (main)]
+    (.replaceAll (name main) "-" "_")))
+
+(defn manifest []
+  (let [manifest (:manifest (build))]
+    (if-let [main (main-class-name)]
+      (assoc manifest "Main-Class" main)
+      manifest)))
+
+(defn source-extensions []
+  (:source-extensions (build)))
+
+(defn compiled-extensions []
+  (:compiled-extensions (build)))
+
+(defn bill-version []
+  (:bill-version (build)))

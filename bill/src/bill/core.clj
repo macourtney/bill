@@ -5,14 +5,19 @@
             [bill.classpath :as classpath]
             [bill.init-tasks :as init-tasks])) ; Loads default tasks.
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "acc28a977cb33456753b9fc81fda6477824366a5"])
+(def bill-version "0.0.1-SNAPSHOT")
+
+(System/setProperty "bill.version" bill-version)
+
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "d18125f55798c805420498b69c62f64b2f5d97f8"])
 
 (defn project-init-form [build-map]
-  `(do
-    (use 'bill.task)
-    (require 'bill.build)
-    (require 'bill.init-build-environment-tasks)
-    (bill.build/update-build! '~build-map)))
+  (let [build-map (assoc build-map :bill-version bill-version)]
+    `(do
+      (use 'bill.task)
+      (require 'bill.build)
+      (require 'bill.init-build-environment-tasks)
+      (bill.build/update-build! '~build-map))))
 
 (defn initialize-environments [build-map]
   (classloader/eval-in (project-init-form build-map))
@@ -26,9 +31,9 @@
 
 (defn execute-build [build-map forms]
   (build/update-build! build-map)
-  (let [classloader (classloader/init-classloader [bill-dependency])]
-    (initialize-environments build-map)
-    (eval-forms forms)))
+  (classloader/init-classloader [bill-dependency])
+  (initialize-environments build-map)
+  (eval-forms forms))
 
 (defmacro defbuild [build-map & args]
   `(execute-build '~build-map '~args))
