@@ -101,7 +101,8 @@
 
 (defn write-jar [jar-file]
   (with-open [jar-output-stream (create-jar-output-stream jar-file)]
-    (add-files-to-jar jar-output-stream)))
+    (add-files-to-jar jar-output-stream))
+  (println "Wrote:" (.getAbsolutePath jar-file)))
 
 (deftask jar
   "Package up all the project's files into a jar file."

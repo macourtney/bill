@@ -45,6 +45,7 @@
 (deftask install
   "Install current project to the local repository."
   [& args]
+  (run-task :jar [])
   (if-let [jar-file (find-jar-file)]
     (install-jar jar-file)
     (println "The jar file could not be found. Nothing installed.")))
