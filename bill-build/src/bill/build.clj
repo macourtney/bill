@@ -23,6 +23,8 @@
 
 (def build-atom (atom build-defaults))
 
+(def ^:dynamic build-environment? false)
+
 (defn build []
   @build-atom)
 

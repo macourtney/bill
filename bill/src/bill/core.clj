@@ -1,6 +1,6 @@
 (ns bill.core
   (:require [bill.build :as build]
-            [bill.build-environment :as build-environment]
+            [bill.bill-environment :as bill-environment]
             [bill.classloader :as classloader]
             [bill.classpath :as classpath]
             [bill.init-tasks :as init-tasks])) ; Loads default tasks.
@@ -9,7 +9,7 @@
 
 (System/setProperty "bill.version" bill-version)
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "d18125f55798c805420498b69c62f64b2f5d97f8"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "66cd712aafb57c3ee5b222f376a38da10ea54ec2"])
 
 (defn project-init-form [build-map]
   (let [build-map (assoc build-map :bill-version bill-version)]
@@ -21,12 +21,12 @@
 
 (defn initialize-environments [build-map]
   (classloader/eval-in (project-init-form build-map))
-  (build-environment/eval-in-build ['(use 'bill.task)]))
+  (bill-environment/eval-in ['(use 'bill.task)]))
 
 (defn eval-forms [forms]
   (doseq [form forms]
-    (if (= (first form) 'build-environment)
-      (build-environment/eval-in-build (rest form))
+    (if (= (first form) 'bill-environment)
+      (bill-environment/eval-in (rest form))
       (classloader/eval-in form))))
 
 (defn execute-build [build-map forms]

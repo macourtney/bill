@@ -16,32 +16,41 @@
   (let [old-build (build/build)]
     (is (not (task/find-task :build-test)))
 
-    (defbuild
-      { :project [org.bill/bill "0.0.1-SNAPSHOT"]
-        :description "A test build" }
+    (binding [build/build-environment? false] ; Force build-environment? to be rebound later.
+      (defbuild
+        { :project [org.bill/bill "0.0.1-SNAPSHOT"]
+          :description "A test build" }
 
-      (use 'clojure.test)
-      (require ['bill.build :as 'build])
-
-      (is (build/build))
-
-      (deftask args-test
-        "Tests the given arguments against [\"Args\" \"test.\"]."
-        [& args]
-        (is (= args ["Args" "test."])))
-
-      (build-environment
         (use 'clojure.test)
+        (require ['bill.build :as 'build])
 
-        (deftask build-test
+        (is (build/build))
+        (is build/build-environment?)
+
+        (deftask args-test
           "Tests the given arguments against [\"Args\" \"test.\"]."
           [& args]
-          (is (= args ["Args" "test."])))))
+          (is (= args ["Args" "test."])))
 
-    (is (= (merge build/build-defaults { :description description :project ['org.bill/bill project-version] })
-           (build/build)))
-    (is (classloader/classloader))
-    (classloader/run-task-in-classloader :args-test ["Args" "test."])
-    (is (task/find-task :build-test))
-    (classloader/classloader! nil)
+        (bill-environment
+          (use 'clojure.test)
+
+          (is (not build/build-environment?))
+
+          (deftask build-test
+            "Tests the given arguments against [\"Args\" \"test.\"]."
+            [& args]
+            (is (= args ["Args" "test."])))))
+      
+      (is (= (merge build/build-defaults
+                    (select-keys old-build [:dependencies :bill-version])
+                    { :description description
+                     :project ['org.bill/bill project-version]
+                     :bill-version "0.0.1-SNAPSHOT" })
+             (build/build)))
+      (is (classloader/classloader))
+      (classloader/run-task-in-classloader :args-test ["Args" "test."])
+      (classloader/classloader! nil)
+      (is (task/find-task :build-test)))
+
     (build/build! old-build)))

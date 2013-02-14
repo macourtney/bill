@@ -6,6 +6,7 @@
 (def manifest-string-value (str "Manifest-Version: 1.0\nCreated-By: " (get (default-manifest) "Created-By") "\nBuilt-By: " (get (default-manifest) "Built-By") "\nBuild-Jdk: " (get (default-manifest) "Build-Jdk")))
 
 (deftest test-init
+  (require 'bill.tasks.jar :reload)
   (is (task/find-task :jar)))
 
 (deftest test-manifest-map

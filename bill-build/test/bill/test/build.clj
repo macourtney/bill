@@ -9,12 +9,12 @@
 (def test-version-str "0.0.1-SNAPSHOT")
 (def test-group-artifact (symbol test-group-id-str test-artifact-id-str))
 (def test-project-vector [test-group-artifact test-version-str])
-        
+
 (deftest test-project
   (update-build! { :project test-project-vector })
   (is (= (project) test-project-vector))
   (build! build-defaults))
-    
+
 (deftest test-dependencies
   (let [dependencies-vector [['org.clojure/clojure "1.4.0" "SHA-1" "867288bc07a6514e2e0b471c5be0bccd6c3a51f9"]]]
     (update-build! { :dependencies dependencies-vector })

@@ -1,20 +1,26 @@
 (ns bill.task
-  (:import [org.bill TaskFailException]))
+  (:import [org.bill TaskFailException])
+  (:require [bill.build :as build]))
 
-(def task-atom (atom {}))
-                  
+(def task-bill-atom (atom {}))
+(def task-build-atom (atom {}))
+
 (defn tasks []
-  @task-atom)
+  (if build/build-environment?
+    @task-build-atom
+    @task-bill-atom))
 
 (defn tasks! [tasks-map]
-  (reset! task-atom tasks-map))
-  
+  (if build/build-environment?
+    (reset! task-build-atom tasks-map)
+    (reset! task-bill-atom tasks-map)))
+
 (defn task-name [task]
   (:name task))
-  
+
 (defn task-function [task]
   (:function task))
-  
+
 (defn task-description [task]
   (:description task))
 
@@ -30,11 +36,15 @@
   (let [task-name (:name task-map)
         parent-task (find-task task-name)
         task-map (assoc task-map :parent parent-task)]
-    (swap! task-atom #(assoc %1 (name %2) %3) task-name task-map)))
+    (if build/build-environment?
+      (swap! task-build-atom #(assoc %1 (name %2) %3) task-name task-map)
+      (swap! task-bill-atom #(assoc %1 (name %2) %3) task-name task-map))))
 
 (defn remove-task [task-name]
-  (swap! task-atom #(dissoc %1 (name %2)) task-name))
-  
+  (if build/build-environment?
+    (swap! task-build-atom #(dissoc %1 (name %2)) task-name)
+    (swap! task-bill-atom #(dissoc %1 (name %2)) task-name)))
+
 (defmacro deftask [task-name arg-vec & body]
   (let [task-name-str (name task-name)
         task-name-symbol (symbol task-name-str)

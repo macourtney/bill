@@ -15,7 +15,7 @@
 (deftest test-serialize-clj
   (is (= (serialize-clj 1) "1"))
   (is (= (serialize-clj "blah") "\"blah\""))
-  (is (= (serialize-clj { :foo "bar" }) "#=(clojure.lang.PersistentArrayMap/create {:foo \"bar\"})")))
+  (is (= (serialize-clj { :foo "bar" }) "{:foo \"bar\"}")))
 
 (deftest test-read-byte-chunk
   (let [byte-chunk (read-byte-chunk (java-io/input-stream (.getBytes "blah" test-utils/byte-char-set)) 4)]
@@ -73,7 +73,7 @@
     (is (= (hash-code bill-jar test-utils/bill-algorithm) test-utils/bill-jar-hash))))
 
 (deftest test-form-hash-code
-  (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "359ab170814755674b1c3ff700055948e674c496"))
+  (is (= (form-hash-code { :foo "bar" } test-utils/clojure-algorithm) "25e0c94fbe12a8e3b4572a56b6517179395d6808"))
   (is (nil? (form-hash-code nil test-utils/clojure-algorithm)))
   (is (nil? (form-hash-code { :foo "bar" } nil)))
   (is (nil? (form-hash-code nil nil))))

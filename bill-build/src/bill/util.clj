@@ -11,12 +11,12 @@
 (def default-chunk-size 1024)
 (def hex-digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 
-(defn serialize-clj [form]
+(defn serialize-clj [form] 
   (when form
     (let [string-writer (new StringWriter)]
-      (binding [*print-dup* true]
+      (binding [*print-dup* false]
         (binding [*out* string-writer]
-          (print form)))
+          (pr form)))
       (.close string-writer)
       (.toString string-writer))))
 

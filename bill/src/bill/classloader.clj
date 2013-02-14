@@ -1,6 +1,5 @@
 (ns bill.classloader
   (:require [bill.build :as build]
-            [bill.build-environment :as build-environment]
             [bill.classpath :as classpath]
             [classlojure.core :as classlojure]))
 
@@ -13,11 +12,21 @@
   (reset! classloader-atom classloader))
 
 (defn init-classloader [initial-classpath]
-  (let [classpath (classpath/build-environment-classpath initial-classpath)]
-    (classloader! (apply classlojure/classlojure classpath))))
+  (let [classpath (classpath/build-environment-classpath initial-classpath)
+        classloader (apply classlojure/classlojure classpath)]
+    (classloader! classloader)))
 
 (defn eval-in [form]
-  (classlojure/eval-in (classloader) form))
-    
+  (binding [build/build-environment? true]
+    (classlojure/eval-in (classloader) form)))
+
 (defn run-task-in-classloader [task args]
-  (eval-in `(~'run-task ~task ~args)))
+  (eval-in 
+    `(try
+       (~'bill.task/run-task ~task '~args)
+       (catch org.bill.TaskFailException task-fail-exception#
+         (println "The task failed:" (.getMessage task-fail-exception#))
+         (System/exit -1))
+       (catch Throwable throwable#
+        (.printStackTrace throwable#)
+        (System/exit -1)))))

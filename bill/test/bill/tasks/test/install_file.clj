@@ -57,10 +57,12 @@
   (is (not (validate-args {} []))))
 
 (deftest test-create-dependency-map
-  (is (= (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])
-         { :group group :artifact artifact :version version :algorithm md5-algorithm :hash "49ca74c5dfb913d5ce5be4930418950d" }))
-  (is (= (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])
-         { :group artifact :artifact artifact :version version :algorithm algorithm :hash "a9b1f3fdb2b49ac4a767203f245772f693198a25" })))
+  (let [test-dependency-map (create-dependency-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm } [])]
+    (is (= test-dependency-map
+           { :group group :artifact artifact :version version :algorithm md5-algorithm :hash (:hash test-dependency-map) })))
+  (let [test-dependency-map (create-dependency-map { :artifact artifact :version version :algorithm algorithm } [test-jar-path])]
+    (is (= test-dependency-map
+         { :group artifact :artifact artifact :version version :algorithm algorithm :hash (:hash test-dependency-map) }))))
 
 (deftest test-create-bill-clj-map
   (is (= (create-bill-clj-map { :file test-jar-path :group group :artifact artifact :version version :algorithm md5-algorithm :dependencies dependencies } [])

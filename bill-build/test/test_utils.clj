@@ -1,12 +1,12 @@
 (ns test-utils
   (:refer-clojure :exclude [clojure-version]))
 
-(def bill-hash "13404996ae75e735e5b14a4af6e674f1d212a744")
+(def bill-hash "0d007ed175e5d2207f1c81e8956783cbee9c7e4c")
 (def bill-algorithm "SHA-1")
 (def bill-version "0.0.1-SNAPSHOT")
 (def bill-name 'org.bill/bill-build)
 
-(def bill-jar-hash "fe1d2a4fbfb1b6caa5dee8bac30ba62ac7ca44fc")
+(def bill-jar-hash "1785d99164d686d023cb24f099592a897ff5ac2b")
 
 (def bill-dependency [bill-name bill-version bill-algorithm bill-hash])
 (def bill-dependency-map { :group "org.bill" :artifact "bill-build" :version bill-version :algorithm bill-algorithm :hash bill-hash })

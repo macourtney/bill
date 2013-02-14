@@ -10,12 +10,13 @@
       (classloader/run-task-in-classloader task (rest args)))))
 
 (defn -main [& args]
-  (try
-    (load-file "build.clj")
-    (run-task args)
-    (catch TaskFailException task-fail-exception
-      (println "The task failed:" (.getMessage task-fail-exception))
-      (System/exit -1))
-    (catch Throwable t
-      (.printStackTrace t)
-      (System/exit -1))))
+  (binding [*read-eval* false]
+    (try
+      (load-file "build.clj")
+      (run-task args)
+      (catch TaskFailException task-fail-exception
+        (println "The task failed:" (.getMessage task-fail-exception))
+        (System/exit -1))
+      (catch Throwable throwable
+        (.printStackTrace throwable)
+        (System/exit -1)))))

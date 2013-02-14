@@ -1,13 +1,14 @@
 (ns bill.tasks.test
   (:use bill.task)
   (:require [bill.build :as build]
+            [bill.task :as task]
             [clojure.test :as test]
             [clojure.tools.namespace.file :as namespace-file]
             [clojure.tools.namespace.find :as namespace-find]))
 
 (defn test-files [dir]
   (namespace-find/find-clojure-sources-in-dir dir))
-            
+
 (defn all-test-files []
   (sort (mapcat test-files (build/test-path-files))))
   

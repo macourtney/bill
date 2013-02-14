@@ -57,7 +57,7 @@
 
 (defn build-environment-classpath [bill-dependencies]
   (concat
-    (classpath bill-dependencies) 
+    (classpath bill-dependencies)
     (build/source-path-files)
     (when-let [compile-path-file (build/compile-path-file)] [compile-path-file])
     (build/test-path-files)
