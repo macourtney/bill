@@ -75,11 +75,20 @@
 (defn form-hash-code [form algorithm]
   (hash-code (form-bytes form) algorithm))
 
-(defn dependency-vector [dependency-map]
+(defn dependency-full-name [dependency-map]
   (let [group (:group dependency-map)
-        artifact (:artifact dependency-map)
-        group-artifact-str (if (and group (not (= group artifact))) (str group "/" artifact) artifact)]
-    [(when group-artifact-str (symbol group-artifact-str))
+        artifact (:artifact dependency-map)]
+    (if (and group (not (= group artifact)))
+      (str group "/" artifact)
+      artifact)))
+
+(defn dependency-full-name-symbol [dependency-map]
+  (when-let [full-name (dependency-full-name dependency-map)]
+    (symbol full-name)))
+
+(defn dependency-vector [dependency-map]
+  (let []
+    [(dependency-full-name-symbol dependency-map)
      (:version dependency-map) (:algorithm dependency-map) (:hash dependency-map)]))
 
 (defn dependency-vector-str [dependency-map]

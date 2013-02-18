@@ -6,26 +6,18 @@
             [bill.classpath :as classpath]
             [bill.util :as util]
             [clojure.java.io :as java-io]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            test-utils))
 
-(def clojure-hash "c5aed5373965d1979dd249dd9f38d7bb5b2ee1c2")
-(def clojure-algorithm "SHA-1")
-(def clojure-version "1.4.0")
-(def clojure-name 'org.clojure/clojure)
-(def clojure-artifact "clojure")
-
-(def clojure-dependency [clojure-name clojure-version clojure-algorithm clojure-hash])
-
-(def clojure-dependency-map (util/dependency-map clojure-dependency))
 (def fail-dependency-map { :artifact :fail :version :1.0.0 :algorithm "SHA-1" :hash :fail })
 
-(def clojure-clj-map { :group "org.clojure"
-                       :artifact "clojure"
-                       :version "1.4.0"
+(def clojure-clj-map { :group test-utils/clojure-group
+                       :artifact test-utils/clojure-artifact
+                       :version test-utils/clojure-version
 
                        :file { :name "clojure-1.4.0.jar"
                                :algorithm "SHA-1"
-                               :hash "867288bc07a6514e2e0b471c5be0bccd6c3a51f9" }
+                               :hash test-utils/clojure-jar-hash }
 
                        :dependencies [] })
 
@@ -55,8 +47,8 @@
     (is (= bill-repository-directory (.getParentFile clojure-algorithm-directory)))))
 
 (deftest test-bill-algorithm-directory
-  (assert-bill-algorithm-directory { :algorithm clojure-algorithm })
-  (assert-bill-algorithm-directory { :algorithm (keyword clojure-algorithm) })
+  (assert-bill-algorithm-directory { :algorithm test-utils/clojure-algorithm })
+  (assert-bill-algorithm-directory { :algorithm (keyword test-utils/clojure-algorithm) })
   (is (nil? (bill-algorithm-directory nil))))
   
 (defn assert-bill-hash-directory [clojure-dependency-map]
@@ -65,8 +57,8 @@
     (is (= (bill-algorithm-directory clojure-dependency-map) (.getParentFile clojure-hash-directory)))))
 
 (deftest test-bill-hash-directory
-  (assert-bill-hash-directory { :algorithm clojure-algorithm :hash clojure-hash })
-  (assert-bill-hash-directory { :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) })
+  (assert-bill-hash-directory { :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash })
+  (assert-bill-hash-directory { :algorithm (keyword test-utils/clojure-algorithm) :hash (keyword test-utils/clojure-hash) })
   (is (nil? (bill-hash-directory nil))))
   
 (defn assert-bill-jar [clojure-dependency-map]
@@ -75,14 +67,14 @@
     (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-jar)))))
 
 (deftest test-bill-jar
-  (assert-bill-jar { :artifact clojure-artifact :version clojure-version :algorithm clojure-algorithm :hash clojure-hash })
-  (assert-bill-jar { :artifact (keyword clojure-artifact) :version (keyword clojure-version) :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) })
+  (assert-bill-jar { :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash })
+  (assert-bill-jar { :artifact (keyword test-utils/clojure-artifact) :version (keyword test-utils/clojure-version) :algorithm (keyword test-utils/clojure-algorithm) :hash (keyword test-utils/clojure-hash) })
   (is (nil? (bill-jar nil))))
   
 (deftest test-bill-jar?
-  (is (bill-jar? { :artifact clojure-artifact :version clojure-version :algorithm clojure-algorithm :hash clojure-hash }))
-  (is (bill-jar? { :artifact (keyword clojure-artifact) :version (keyword clojure-version) :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) }))
-  (is (not (bill-jar? { :artifact :fail :version :1.0.0 :algorithm (keyword clojure-algorithm) :hash :fail }))))
+  (is (bill-jar? { :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }))
+  (is (bill-jar? { :artifact (keyword test-utils/clojure-artifact) :version (keyword test-utils/clojure-version) :algorithm (keyword test-utils/clojure-algorithm) :hash (keyword test-utils/clojure-hash) }))
+  (is (not (bill-jar? { :artifact :fail :version :1.0.0 :algorithm (keyword test-utils/clojure-algorithm) :hash :fail }))))
 
 (defn assert-bill-clj [clojure-dependency-map]
   (let [clojure-clj (bill-clj clojure-dependency-map)]
@@ -90,21 +82,21 @@
     (is (= (bill-hash-directory clojure-dependency-map) (.getParentFile clojure-clj)))))
   
 (deftest test-bill-clj
-  (assert-bill-clj { :artifact clojure-artifact :version clojure-version :algorithm clojure-algorithm :hash clojure-hash })
-  (assert-bill-clj { :artifact (keyword clojure-artifact) :version (keyword clojure-version) :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) })
+  (assert-bill-clj { :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash })
+  (assert-bill-clj { :artifact (keyword test-utils/clojure-artifact) :version (keyword test-utils/clojure-version) :algorithm (keyword test-utils/clojure-algorithm) :hash (keyword test-utils/clojure-hash) })
   (is (nil? (bill-clj nil))))
   
 (deftest test-bill-clj?
-  (is (bill-clj? { :artifact clojure-artifact :version clojure-version :algorithm clojure-algorithm :hash clojure-hash }))
-  (is (bill-clj? { :artifact (keyword clojure-artifact) :version (keyword clojure-version) :algorithm (keyword clojure-algorithm) :hash (keyword clojure-hash) }))
+  (is (bill-clj? { :artifact test-utils/clojure-artifact :version test-utils/clojure-version :algorithm test-utils/clojure-algorithm :hash test-utils/clojure-hash }))
+  (is (bill-clj? { :artifact (keyword test-utils/clojure-artifact) :version (keyword test-utils/clojure-version) :algorithm (keyword test-utils/clojure-algorithm) :hash (keyword test-utils/clojure-hash) }))
   (is (not (bill-clj? fail-dependency-map))))
 
 (deftest test-read-bill-clj-file
-  (is (= (read-bill-clj-file (bill-clj clojure-dependency-map))
+  (is (= (read-bill-clj-file (bill-clj test-utils/clojure-dependency-map))
           clojure-clj-map)))
   
 (deftest test-read-bill-clj
-  (is (= (read-bill-clj clojure-dependency-map)
+  (is (= (read-bill-clj test-utils/clojure-dependency-map)
           clojure-clj-map)))
 
 (deftest test-write-bill-clj

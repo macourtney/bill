@@ -74,7 +74,12 @@
 
 (defn read-bill-clj-file [bill-clj-file]
   (when (and bill-clj-file (.exists bill-clj-file))
-    (read (PushbackReader. (java-io/reader bill-clj-file)))))
+    (with-open [bill-clj-reader (PushbackReader. (java-io/reader bill-clj-file))]
+      (try
+        (read bill-clj-reader)
+        (catch RuntimeException runtime-exception
+          (binding [*read-eval* true]
+            (read bill-clj-reader)))))))
 
 (defn read-bill-clj [dependency-map]
   (when (bill-clj? dependency-map)
