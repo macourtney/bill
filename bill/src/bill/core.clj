@@ -2,14 +2,13 @@
   (:require [bill.build :as build]
             [bill.bill-environment :as bill-environment]
             [bill.classloader :as classloader]
-            [bill.classpath :as classpath]
-            [bill.init-tasks :as init-tasks])) ; Loads default tasks.
+            [bill.classpath :as classpath]))
 
 (def bill-version "0.0.1-SNAPSHOT")
 
 (System/setProperty "bill.version" bill-version)
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "7a778142f02f24a20893f480cb3cfa93d3a776f9"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "e61e451af6f72eeac319a340f2ea0c103d163ef0"])
 
 (defn project-init-form [build-map]
   (let [build-map (assoc build-map :bill-version bill-version)]
