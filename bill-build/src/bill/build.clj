@@ -19,6 +19,11 @@
     :compiled-extensions ["class"]
     
     :manifest {} ; The attributes of the manifest file.
+    
+    :jar-name nil ; The name of the jar file. If nil, generate the name from the project vector.
+    :uberjar-name nil ; The name of the uber jar. If nil, generate the name from the project vector.
+    
+    :uberjar-exclusions [] ; Entries to exclude from the uberjar. Exclusions should be a vector of regular expressions.
   })
 
 (def build-atom (atom build-defaults))
@@ -108,6 +113,9 @@
   (when-let [target (target-path)]
     (when-let [jar (uberjar-name)]
       (java-io/file target jar))))
+
+(defn uberjar-exclusions []
+  (:uberjar-exclusions (build)))
 
 (defn main []
   (:main (build)))

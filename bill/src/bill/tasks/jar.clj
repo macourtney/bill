@@ -100,6 +100,9 @@
   (add-compiled-files (add-resource-files (add-source-files jar-output-stream))))
 
 (defn write-jar [jar-file]
+  (when jar-file
+    (when-let [jar-directory (.getParentFile jar-file)]
+      (.mkdirs jar-directory)))
   (with-open [jar-output-stream (create-jar-output-stream jar-file)]
     (add-files-to-jar jar-output-stream))
   (println "Wrote:" (.getAbsolutePath jar-file)))

@@ -5,6 +5,7 @@
             bill.tasks.install
             bill.tasks.install-file
             bill.tasks.install-maven
-            bill.tasks.jar))
+            bill.tasks.jar
+            bill.tasks.uberjar))
 
 ; This file does nothing but load other files with tasks.

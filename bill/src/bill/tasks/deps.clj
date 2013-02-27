@@ -5,7 +5,7 @@
             [bill.util :as util]))
 
 (defn install-dependency [installed? dependency]
-  (and (install-maven/install-dependency (util/dependency-map dependency)) installed?))
+  (or (install-maven/install-dependency (util/dependency-map dependency)) installed?))
 
 (defn install-dependencies [dependencies]
   (reduce install-dependency false dependencies))
