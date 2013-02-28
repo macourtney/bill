@@ -1,5 +1,7 @@
 (ns bill.build
-  (:require [clojure.java.io :as java-io]))
+  (:refer-clojure :exclude [compile])
+  (:require [clojure.java.io :as java-io]
+            [clojure.tools.namespace.find :as namespace-find]))
 
 (def build-defaults
   {
@@ -17,6 +19,8 @@
     
     :source-extensions ["clj"]
     :compiled-extensions ["class"]
+    
+    :compile [] ; A list of regular expressions for the namespaces of the clj files to compile.
     
     :manifest {} ; The attributes of the manifest file.
     
@@ -56,6 +60,9 @@
 
 (defn source-path-files []
   (map java-io/file (source-paths)))
+
+(defn source-namespaces []
+  (mapcat namespace-find/find-namespaces-in-dir (source-path-files)))
 
 (defn compile-path []
   (:compile-path (build)))
@@ -138,3 +145,6 @@
 
 (defn bill-version []
   (:bill-version (build)))
+  
+(defn compile []
+  (:compile (build)))

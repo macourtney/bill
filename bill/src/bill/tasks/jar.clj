@@ -110,6 +110,7 @@
 (deftask jar
   "Package up all the project's files into a jar file."
   [& args]
+  (run-task :compile [])
   (if-let [jar-file (build/target-jar-file)]
     (write-jar jar-file)
     (println "No jar file set.")))

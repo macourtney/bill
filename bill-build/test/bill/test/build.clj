@@ -1,4 +1,5 @@
 (ns bill.test.build
+  (:refer-clojure :exclude [compile])
   (:use clojure.test
         bill.build)
   (:require [clojure.java.io :as java-io])
