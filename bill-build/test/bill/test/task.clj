@@ -4,17 +4,21 @@
   (:import [org.bill TaskFailException]))
 
 (deftest test-tasks
-  (is (= (tasks) {}))
-  (let [tasks-map { :test { :name :test :function (fn [& args] (println args)) } }]
+  (let [old-tasks (tasks)
+        tasks-map { :test { :name :test :function (fn [& args] (println args)) } }]
+    (tasks! {})
+    (is (= (tasks) {}))
     (tasks! tasks-map)
     (is (= (tasks) tasks-map))
-    (tasks! {})
-    (is (= (tasks) {}))))
+    (tasks! old-tasks)
+    (is (= (tasks) old-tasks))))
 
 (deftest test-add-run-task
-  (let [test-task-name 'test-task
+  (let [old-tasks (tasks)
+        test-task-name 'test-task
         test-task-fn (fn [& args] (println args))
         test-task-map { :parent nil :name test-task-name :function test-task-fn }]
+    (tasks! {})
     (is (= (tasks) {}))
     (is (nil? (find-task test-task-name)))
     (add-task test-task-map)
@@ -22,12 +26,14 @@
     (is (= (find-task (name test-task-name)) test-task-map))
     (remove-task test-task-name)
     (is (nil? (find-task test-task-name)))
-    (tasks! {})
-    (is (= (tasks) {}))))
+    (tasks! old-tasks)
+    (is (= (tasks) old-tasks))))
 
 (deftest test-deftask
-  (let [test-task-name 'test-task
+  (let [old-tasks (tasks)
+        test-task-name 'test-task
         test-args ["test" "task"]]
+    (tasks! {})
     (is (= (tasks) {}))
     (is (nil? (find-task test-task-name)))
 
@@ -44,8 +50,8 @@
       (is (= (:name test-task) (name test-task-name)))
       (is (:parent test-task))
       (run-task test-task-name test-args))
-    (tasks! {})
-    (is (= (tasks) {}))))
+    (tasks! old-tasks)
+    (is (= (tasks) old-tasks))))
 
 (deftest test-fail
   (let [message "Totally valid failure."]
