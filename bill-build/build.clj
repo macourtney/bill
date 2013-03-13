@@ -8,5 +8,4 @@
     :dependencies [[org.clojure/clojure "1.4.0" "SHA-1" "3752cfd2c96be72fb96fcf79a2a546969dfda480"]
                    [org.clojure/tools.namespace "0.2.2" "SHA-1" "f3de89d584f15c17408bff1a04522d1a792a0bd2"]]
 
-    :compile-path "./target/classes"
     :compile [bill.task-fail-exception] })

@@ -1,6 +1,7 @@
 (ns bill.tasks.compile
   (:use bill.task)
   (:require [bill.build :as build]
+            [classlojure.core :as classlojure]
             [clojure.java.io :as java-io]))
 
 (defn compile?
@@ -51,13 +52,15 @@
 (defn compile-namespaces [namespaces]
   (if namespaces
     (try
+      (println "Classpath:" (seq (.getURLs (.getContextClassLoader (Thread/currentThread)))))
       (.mkdirs (build/compile-path-file))
       (binding [*compile-path* (build/compile-path-file)]
         (doseq [namespace namespaces]
           (println "Compiling" namespace)
           (clojure.core/compile namespace)))
-      (catch Exception e
-        (println "Compilation failed:" (.getMessage e))))
+      (catch Exception exception
+        (println "Compilation failed:" (.getMessage exception))
+        (.printStackTrace exception)))
     (println "Nothing to compile.")))
 
 (deftask compile

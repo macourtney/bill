@@ -8,7 +8,7 @@
 
 (System/setProperty "bill.version" bill-version)
 
-(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "2640ad2a2d2f3ee9070e503a22d8e7c68f6c3684"])
+(def bill-dependency ['org.bill/bill-build "0.0.1-SNAPSHOT" "SHA-1" "0e4dd3ae4c9654e6b7a697b74f352d71513f1a72"])
 
 (defn project-init-form [build-map]
   (let [build-map (assoc build-map :bill-version bill-version)]

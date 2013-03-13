@@ -21,12 +21,15 @@
     (classlojure/eval-in (classloader) form)))
 
 (defn run-task-in-classloader [task args]
+  (println "Running task" task "in classloader.")
   (eval-in 
     `(try
-       (~'bill.task/run-task ~task '~args)
-       (catch org.bill.TaskFailException task-fail-exception#
-         (println "The task failed:" (.getMessage task-fail-exception#))
-         (System/exit -1))
-       (catch Throwable throwable#
-        (.printStackTrace throwable#)
-        (System/exit -1)))))
+      (if (~'bill.task/find-task ~task)
+        (~'bill.task/run-task ~task '~args)
+        (println "Task not found:" ~task))
+      (catch org.bill.TaskFailException task-fail-exception#
+        (println "The task failed:" (.getMessage task-fail-exception#))
+        (System/exit -1))
+      (catch Throwable throwable#
+       (.printStackTrace throwable#)
+       (System/exit -1)))))
