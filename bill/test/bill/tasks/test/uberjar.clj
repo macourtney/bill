@@ -34,7 +34,8 @@
 (deftest test-uberjar-stream
   (let [uberjar-file (build/target-uberjar-file)]
     (is (not (.exists uberjar-file)))
-    (is (uberjar-stream))
+    (with-open [uberjar-stream (uberjar-stream)]
+      (is uberjar-stream))
     (is (.exists uberjar-file))
     (.delete uberjar-file)
     (is (not (.exists uberjar-file)))))
@@ -67,8 +68,7 @@
     (with-open [uberjar-stream (uberjar-stream)]
       (write-entry uberjar-stream clojure-zip-file test-entry))
     (is (.exists uberjar-file))
-    (.delete uberjar-file)
-    (is (not (.exists uberjar-file)))))
+    (is (.delete uberjar-file))))
 
 (deftest test-write-jar
   (let [uberjar-file (build/target-uberjar-file)]
@@ -76,10 +76,11 @@
     (with-open [uberjar-stream (uberjar-stream)]
       (write-jar uberjar-stream test-utils/clojure-jar #{}))
     (is (.exists uberjar-file))
-    (is (= (map #(.getName %) (jar-entries (ZipFile. test-utils/clojure-jar)))
-           (map #(.getName %) (jar-entries (ZipFile. uberjar-file)))))
-    (.delete uberjar-file)
-    (is (not (.exists uberjar-file)))))
+    (with-open [clojure-jar-zip-file (ZipFile. test-utils/clojure-jar)
+                uberjar-zip-file (ZipFile. uberjar-file)]
+      (is (= (map #(.getName %) (jar-entries clojure-jar-zip-file))
+             (map #(.getName %) (jar-entries uberjar-zip-file)))))
+    (is (.delete uberjar-file) (str "Could not delete " (.getAbsolutePath uberjar-file)))))
 
 (deftest test-write-jars
   (let [uberjar-file (build/target-uberjar-file)]
@@ -87,13 +88,11 @@
     (with-open [uberjar-stream (uberjar-stream)]
       (write-jars uberjar-stream))
     (is (.exists uberjar-file))
-    (.delete uberjar-file)
-    (is (not (.exists uberjar-file)))))
+    (is (.delete uberjar-file))))
 
 (deftest test-write-uberjar
   (let [uberjar-file (build/target-uberjar-file)]
     (is (not (.exists uberjar-file)))
     (write-uberjar)
     (is (.exists uberjar-file))
-    (.delete uberjar-file)
-    (is (not (.exists uberjar-file)))))
+    (is (.delete uberjar-file))))
